@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<company>
+	<group id="1001">
+		<name>starter1</name>
+		<level>40</level>
+		<capacity>13</capacity>
+		<value>100</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+	<group id="2001">
+		<name>starter2</name>
+		<level>40</level>
+		<capacity>13</capacity>
+		<value>90</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+	<group id="3001">
+		<name>element1</name>
+		<level>35</level>
+		<capacity>11</capacity>
+		<value>80</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+	<group id="4001">
+		<name>element2</name>
+		<level>35</level>
+		<capacity>10</capacity>
+		<value>70</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+	<group id="5001">
+		<name>preInt1</name>
+		<level>30</level>
+		<capacity>9</capacity>
+		<value>60</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+	<group id="6001">
+		<name>preInt2</name>
+		<level>30</level>
+		<capacity>8</capacity>
+		<value>50</value>
+		<studentAge>20</studentAge>
+		<teacher>10</teacher>
+	</group>
+</company>
