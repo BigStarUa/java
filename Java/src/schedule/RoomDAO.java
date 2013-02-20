@@ -24,7 +24,6 @@ public class RoomDAO {
 		room.setValue(rs.getInt("value"));
 		room.setCapacity(rs.getInt("capacity"));
 		return room;
-		
 	}
 	
 	public Room getGroup(int id)
