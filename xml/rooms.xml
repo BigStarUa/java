@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<company>
+	<room id="1001">
+		<name>first</name>
+		<value>100</value>
+		<capacity>14</capacity>
+	</room>
+	<room id="2001">
+		<name>second</name>
+		<value>80</value>
+		<capacity>13</capacity>
+	</room>
+	<room id="3001">
+		<name>third</name>
+		<value>90</value>
+		<capacity>13</capacity>
+	</room>
+	<room id="4001">
+		<name>fourth</name>
+		<value>70</value>
+		<capacity>13</capacity>
+	</room>
+	<room id="5001">
+		<name>fifth</name>
+		<value>60</value>
+		<capacity>13</capacity>
+	</room>
+	<room id="6001">
+		<name>sixth</name>
+		<value>50</value>
+		<capacity>13</capacity>
+	</room>
+	<room id="7001">
+		<name>Seventh</name>
+		<value>140</value>
+		<capacity>12</capacity>
+	</room>
+</company>

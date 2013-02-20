@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schedule-all>
+	<schedule id="1">
+		<name>monday(8:15)</name>
+		<day>Monday</day>
+		<time>8:15</time>
+	</room>
+	<schedule id="2">
+		<name>monday(10:00)</name>
+		<day>Monday</day>
+		<time>10:00</time>
+	</room>
+</schedule-all>
