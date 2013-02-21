@@ -25,7 +25,7 @@ public class GroupDAO {
 		group.setStudentAge(rs.getInt("stud_age"));
 		group.setTeacher(rs.getInt("teacher"));
 		group.setSchedule(rs.getInt("schedule"));
-		
+		group.setValue(rs.getInt("value"));
 		return group;
 		
 	}

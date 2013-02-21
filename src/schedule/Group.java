@@ -63,6 +63,11 @@ public class Group implements Comparable<Group>{
 		this.schedule = schedule;
 	}
 	
+	public void setValue(int value)
+	{
+		this.value = value;
+	}
+	
 	public int getId()
 	{
 		return this.id;
@@ -96,6 +101,11 @@ public class Group implements Comparable<Group>{
 	public int getSchedule()
 	{
 		return this.schedule;
+	}
+	
+	public int getValue()
+	{
+		return this.value;
 	}
 	
 
