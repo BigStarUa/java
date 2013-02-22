@@ -23,11 +23,18 @@ public class GroupDAO {
 		group.setLevel(rs.getInt("level"));
 		group.setCapacity(rs.getInt("capacity"));
 		group.setStudentAge(rs.getInt("stud_age"));
-		group.setTeacher(rs.getInt("teacher"));
+		group.setTeacher(getTeacher(rs.getInt("teacher")));
 		group.setSchedule(rs.getInt("schedule"));
-		
+		group.setValue(rs.getInt("value"));
 		return group;
 		
+	}
+	
+	private Teacher getTeacher(int id)
+	{
+		TeacherDAO teacherDAO = new TeacherDAO(con);
+		Teacher teacher = teacherDAO.getTeacher(id);
+		return teacher;
 	}
 	
 	public Group getGroup(int id)
@@ -54,12 +61,12 @@ public class GroupDAO {
 		return group;
 	}
 	
-	public List<Group> getGroupList()
+	public List<Group> getGroupList(int schedule)
 	{
 		List<Group> list = new ArrayList<Group>();
 		
 		try {
-			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM groups" );
+			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM groups WHERE schedule=" + schedule );
 			while(rs.next())
 			{
 				list.add(getGroupFromRS(rs));				
@@ -93,7 +100,7 @@ public class GroupDAO {
 		    ps.setInt( 2, group.getLevel() );
 		    ps.setInt( 3, group.getCapacity() );
 		    ps.setInt( 4, group.getStudentAge() );
-		    ps.setInt( 5, group.getTeacher() );
+		    ps.setInt( 5, group.getTeacher().getId() );
 		    ps.setInt( 6, group.getSchedule() );
 		    ps.executeUpdate();
 		    ps.close();
@@ -112,6 +119,7 @@ public class GroupDAO {
 	       PreparedStatement ps = con.prepareStatement( "DELETE FROM groups WHERE id=?" );
 	       ps.setInt( 1, id );
 	       ps.executeUpdate();
+	       ps.close();
 	     }
 	     catch( SQLException e )
 	     { 

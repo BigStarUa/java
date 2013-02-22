@@ -8,8 +8,9 @@ public class Group implements Comparable<Group>{
 	private int capacity;
 	private int value;
 	private int studentAge;
-	private int teacher;
+	private Teacher teacher;
 	private int schedule;
+	private Room room;
 	
 	public Group(String name, int level, int capacity,
 			int studentAge, int teacher, int schedule, int value) {
@@ -18,7 +19,7 @@ public class Group implements Comparable<Group>{
 		this.level = level;
 		this.capacity = capacity;
 		this.studentAge = studentAge;
-		this.teacher = teacher;
+		//this.teacher = teacher;
 		this.schedule = schedule;
 		this.value = value;
 		//countValue();
@@ -53,7 +54,7 @@ public class Group implements Comparable<Group>{
 		this.studentAge = studentAge;
 	}
 	
-	public void setTeacher(int teacher)
+	public void setTeacher(Teacher teacher)
 	{
 		this.teacher = teacher;
 	}
@@ -61,6 +62,16 @@ public class Group implements Comparable<Group>{
 	public void setSchedule(int schedule)
 	{
 		this.schedule = schedule;
+	}
+	
+	public void setValue(int value)
+	{
+		this.value = value;
+	}
+	
+	public void setRoom(Room room)
+	{
+		this.room = room;
 	}
 	
 	public int getId()
@@ -88,7 +99,7 @@ public class Group implements Comparable<Group>{
 		return this.studentAge;
 	}
 	
-	public int getTeacher()
+	public Teacher getTeacher()
 	{
 		return this.teacher;
 	}
@@ -98,6 +109,15 @@ public class Group implements Comparable<Group>{
 		return this.schedule;
 	}
 	
+	public int getValue()
+	{
+		return this.value;
+	}
+	
+	public Room getRoom()
+	{
+		return this.room;
+	}
 
 	@Override
 	public int compareTo(Group g) {
@@ -113,14 +133,14 @@ public class Group implements Comparable<Group>{
 	
 	private int countValue(Group g) {
 		
-		int value = g.level + (g.capacity*3) + g.studentAge + g.teacher;
+		//int value = g.level + (g.capacity*3) + g.studentAge + g.teacher;
 		
 		return value;
 	}
 	
 	private void countValue() {
 		
-		int value = this.level + (this.capacity*3) + this.studentAge + this.teacher;
+		int value = this.level + (this.capacity*3) + this.studentAge + this.teacher.getValue();
 		
 		this.value = value;
 	}

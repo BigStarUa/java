@@ -2,14 +2,15 @@ package schedule;
 
 import gui.ComboBoxInterface;
 
-public class Teacher implements ComboBoxInterface{
+public class Level implements ComboBoxInterface{
 
-	int id;
-	String name;	
-	int value;
+	private int id;
+	private String name;
+	private int value;
 	
-	public Teacher() {
-
+	public Level()
+	{
+		
 	}
 	
 	public void setId(int id)
@@ -26,7 +27,7 @@ public class Teacher implements ComboBoxInterface{
 	{
 		this.value = value;
 	}
-
+	
 	public int getId()
 	{
 		return this.id;

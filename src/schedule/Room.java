@@ -9,6 +9,7 @@ public class Room implements Comparable<Room>, Comparator<Room>{
 	String name;
 	int value;
 	int capacity;
+	int group_id;
 	Group group = null;
 	//HashMap<K, V> schedule;
 	public Room(String name, int value, int capacity) {
@@ -45,6 +46,11 @@ public class Room implements Comparable<Room>, Comparator<Room>{
 		this.capacity = capacity;
 	}
 	
+	public void setGroupId(int group_id)
+	{
+		this.group_id = group_id;
+	}
+	
 	public void setGroup(Group g) {
 		this.group = g;		
 	}
@@ -67,6 +73,11 @@ public class Room implements Comparable<Room>, Comparator<Room>{
 	public int getCapacity()
 	{
 		return this.capacity;
+	}
+	
+	public int getGroupId()
+	{
+		return this.group_id;
 	}
 	
 	public Group getGroup() {

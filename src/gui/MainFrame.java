@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -9,6 +11,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -17,6 +21,7 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -26,8 +31,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.JToolBar;
 
-public class MainFrame extends JFrame {
+import schedule.Group;
+
+public class MainFrame extends JFrame implements ToolBarInteface{
 
 	private JPanel contentPane;
 	
@@ -42,7 +50,11 @@ public class MainFrame extends JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTabbedPane tabbedPane;
+    private javax.swing.JToolBar toolBar;
     // End of variables declaration   
+
+	private JPanel toolBarPanel;
+	JFrame mainFrame = null;
 
 	/**
 	 * Launch the application.
@@ -158,19 +170,65 @@ public class MainFrame extends JFrame {
 	    c.getActionMap().put("closeTab", closeTabAction);
 	  }
 	  
-	  private void createTabButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                
+	  private void createTabButtonActionPerformed(java.awt.event.ActionEvent evt, JComponent newclass, String name) {                                                
 		    System.out.println("Add new tab!");
-		    tabCount++;   
-		    JScrollPane scrollPane = new JScrollPane(new GroupsGrid());
-		    //JScrollPane scrollPane = new JScrollPane(new JTextArea("New tab number " + tabCount));
+		    //tabCount++;   
+		    //JScrollPane scrollPane = new JScrollPane(new GroupsGrid());	    
 		    Icon icon = PAGE_ICON;
-		    addClosableTab(tabbedPane, scrollPane, "Tab " + tabCount, icon);
+		    addClosableTab(tabbedPane,  newclass, name, icon);
+		    
 		  } 
+	  
+	  private boolean checkExistingTab(String className)
+	  {
+		  boolean exist = false;
+		    int count = tabbedPane.getTabCount();
+		    for (int i = 0; i < count; i++) {
+		    	Component comp = tabbedPane.getComponentAt(i);
+			    if(className == comp.getClass().getName())
+			    {
+			    	tabbedPane.setSelectedIndex(i);
+			    	exist = true;
+			    	//reBuildJToolBar(comp);
+			    	break;
+			    }	
+		    }
+		    
+		  return exist;
+	  }
+	  
+	 private void reBuildJToolBar(Component comp)
+	 {
+		 ToolBarInteface tbf = (ToolBarInteface)comp;
+		 toolBar.removeAll();
+		 toolBar.add(tbf.getToolbar());
+		 toolBar.repaint();
+		 toolBar.revalidate();
+	 }
 	
 	
 	private void initComponent() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 536, 430);
+		
+		ChangeListener changeListener = new ChangeListener() {
+		      public void stateChanged(ChangeEvent changeEvent) {
+		        JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
+		        int index = sourceTabbedPane.getSelectedIndex();
+		        Component comp = null;
+		        if(index >= 0)
+		        {
+		        	comp = sourceTabbedPane.getComponentAt(index);
+		        }
+		        else
+		        {
+		        	comp = MainFrame.this;
+		        System.out.println("Tab changed to: " + comp.toString());
+		        }
+		        reBuildJToolBar(comp);
+		      }
+		    };
+		
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -187,31 +245,70 @@ public class MainFrame extends JFrame {
 		JMenuItem mntmGroups = new JMenuItem("Groups");
 		mntmGroups.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createTabButtonActionPerformed(evt);
+            	if(!checkExistingTab(GroupsGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new GroupsGrid(), "Groups");
+            	}
             }
         });
 		mnGridview.add(mntmGroups);
 		
 		JMenuItem mntmRooms = new JMenuItem("Rooms");
+		mntmRooms.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(RoomsGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new RoomsGrid(), "Rooms");
+            	}
+            }
+        });
 		mnGridview.add(mntmRooms);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		JPanel panel = new JPanel();
-		contentPane.add(panel, BorderLayout.NORTH);
-		
-		JButton btnAddTab = new JButton("Add Tab");
-		btnAddTab.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createTabButtonActionPerformed(evt);
-            }
-        });		
-		panel.add(btnAddTab);
+		//JPanel panel = new JPanel();
+		//contentPane.add(panel, BorderLayout.NORTH);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		
+		tabbedPane.addChangeListener(changeListener);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
+		
+		toolBar = new JToolBar();
+		contentPane.add(toolBar, BorderLayout.NORTH);
+		
+		setToolBar();
+		toolBar.add(this.toolBarPanel);
+	}
+
+	private void setToolBar()
+	{
+		JPanel toolBar = new JPanel();
+		JButton btnNewButton = new JButton("Main Button");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				GroupsDialog gd;
+				try {
+					gd = new GroupsDialog(MainFrame.this, "", Dialog.ModalityType.DOCUMENT_MODAL, new Group());
+					gd.setVisible(true);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		toolBar.add(btnNewButton);
+		
+		this.toolBarPanel = toolBar;
+	}
+	
+	@Override
+	public JPanel getToolbar() {
+		// TODO Auto-generated method stub
+		return this.toolBarPanel;
 	}
 
 }
