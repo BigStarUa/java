@@ -112,6 +112,7 @@ public class GroupDAO {
 	       PreparedStatement ps = con.prepareStatement( "DELETE FROM groups WHERE id=?" );
 	       ps.setInt( 1, id );
 	       ps.executeUpdate();
+	       ps.close();
 	     }
 	     catch( SQLException e )
 	     { 

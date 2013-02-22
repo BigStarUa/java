@@ -1,18 +1,14 @@
 package schedule;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
 public class Main{
 	
 		public static void main(String[] args) throws ClassNotFoundException {
 	
+			int[] sched = {1,2};
 			
 			DbHelper db = new DbHelper();
 			
@@ -52,6 +48,8 @@ public class Main{
 					Room g = rooms.get(n);
 					//if(g == null) continue;
 					
+					if(r.getGroup() == null) break;
+					
 					if(r.value < g.value) {
 						if(g.getGroup() == null && g.capacity >= r.getGroup().getCapacity()){
 							
@@ -60,7 +58,7 @@ public class Main{
 							flag = true;
 							
 						}else if(g.getGroup() != null && r.getGroup() != null){
-							if(r.getGroup().getValue() >= g.getGroup().getValue() && 
+							if(r.getGroup().getValue() > g.getGroup().getValue() && 
 									r.capacity >= g.getGroup().getCapacity() && g.capacity >= r.getGroup().getCapacity()) 
 							{
 								Group temp = r.getGroup();
