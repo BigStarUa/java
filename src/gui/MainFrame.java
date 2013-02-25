@@ -223,7 +223,6 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		        else
 		        {
 		        	comp = MainFrame.this;
-		        System.out.println("Tab changed to: " + comp.toString());
 		        }
 		        reBuildJToolBar(comp);
 		      }

@@ -20,7 +20,7 @@ public class GroupDAO {
 		Group group = new Group();
 		group.setId(rs.getInt("id"));
 		group.setName(rs.getString("name"));
-		group.setLevel(rs.getInt("level"));
+		group.setLevel(getLevel(rs.getInt("level")));
 		group.setCapacity(rs.getInt("capacity"));
 		group.setStudentAge(rs.getInt("stud_age"));
 		group.setTeacher(getTeacher(rs.getInt("teacher")));
@@ -28,6 +28,13 @@ public class GroupDAO {
 		group.setValue(rs.getInt("value"));
 		return group;
 		
+	}
+	
+	private Level getLevel(int id)
+	{
+		LevelDAO levelDAO = new LevelDAO(con);
+		Level level = levelDAO.getLevel(id);
+		return level;
 	}
 	
 	private Teacher getTeacher(int id)
@@ -97,7 +104,7 @@ public class GroupDAO {
 						" stud_age, teacher, schedule) VALUES (?,?,?,?,?,?)" );	
 			}
 			ps.setString( 1, group.getName());
-		    ps.setInt( 2, group.getLevel() );
+		    ps.setInt( 2, group.getLevel().getId() );
 		    ps.setInt( 3, group.getCapacity() );
 		    ps.setInt( 4, group.getStudentAge() );
 		    ps.setInt( 5, group.getTeacher().getId() );

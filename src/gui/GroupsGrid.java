@@ -18,6 +18,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
 
 public class GroupsGrid extends JPanel implements ToolBarInteface{
 	/**
@@ -35,7 +37,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 		//FlowLayout flowLayout = (FlowLayout) getLayout();
 		setLayout(new  BorderLayout());
 		//Массив названий столбцов
-		  String[] columnNames = {"Name", "Level", "Schedule"};
+		  String[] columnNames = {"Name", "Level", "Teacher", "Quantity", "Schedule"};
 		  
 		  DbHelper db;
 		  groupList = null;
@@ -44,15 +46,44 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 			db = new DbHelper();
 			GroupDAO groupDAO = new GroupDAO(db.connection);
 			groupList = groupDAO.getGroupList(1);
-			Object[] [] dataT = new Object[groupList.size()][3];
+			Object[] [] dataT = new Object[groupList.size()][5];
 			for(int i=0; i<groupList.size(); i++)
 			{
 				Group g = groupList.get(i);
 				dataT[i][0] = g.getName();
-				dataT[i][1] = g.getLevel();
-				dataT[i][2] = g.getSchedule();
+				dataT[i][1] = g.getLevel().getName();
+				dataT[i][2] = g.getTeacher().getName();
+				dataT[i][3] = g.getCapacity();
+				dataT[i][4] = g.getSchedule();
 			}
-			table = new JTable(dataT, columnNames);
+			DefaultTableModel model = new DefaultTableModel(dataT, columnNames){
+				
+				 public boolean isCellEditable(int row, int column)
+				 {
+				     return false;
+				 }
+			};
+			
+			table = new JTable(model);
+			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			
+			table.addMouseListener(new java.awt.event.MouseAdapter() {
+				
+				
+			    @Override
+			    public void mouseClicked(java.awt.event.MouseEvent evt) {
+			    	 if (evt.getClickCount() == 2){
+				        int row = table.rowAtPoint(evt.getPoint());
+				        if (row >= 0 ) {
+				        	Group g = groupList.get(table.getSelectedRow());
+				        	getDialog(g);
+				        	System.out.println(row);
+				        }
+			    	 }
+			    }
+			});
+			
+			
 			add(new JScrollPane(table), BorderLayout.CENTER);
 			setToolBar();
 		} catch (ClassNotFoundException e) {
@@ -63,21 +94,26 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 
 	}
 	
+	private void getDialog(Group group)
+	{
+		GroupsDialog gd;
+		try {
+			gd = new GroupsDialog((Window)GroupsGrid.this.getRootPane().getParent(), "Edit Group", Dialog.ModalityType.DOCUMENT_MODAL, group);
+			gd.setVisible(true);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 	private void setToolBar()
 	{
 		JPanel toolBar = new JPanel();
 		JButton btnNewButton = new JButton("Add Group");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				GroupsDialog gd;
-				try {
-					gd = new GroupsDialog((Window)GroupsGrid.this.getRootPane().getParent(), "", Dialog.ModalityType.DOCUMENT_MODAL, groupList.get(3));
-					gd.setVisible(true);
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+				getDialog(new Group());
 			}
 		});
 		toolBar.add(btnNewButton);

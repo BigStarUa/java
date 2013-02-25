@@ -28,7 +28,7 @@ public class ComboBoxRenderer extends BasicComboBoxRenderer {
 
         if (index == -1)
         {
-        	ComboBoxInterface item = (ComboBoxInterface)value;
+        	//ComboBoxInterface item = (ComboBoxInterface)value;
             //setText( "None" );
         }
 

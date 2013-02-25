@@ -4,7 +4,7 @@ public class Group implements Comparable<Group>{
 	
 	private int id;
 	private String name;
-	private int level;
+	private Level level;
 	private int capacity;
 	private int value;
 	private int studentAge;
@@ -16,7 +16,7 @@ public class Group implements Comparable<Group>{
 			int studentAge, int teacher, int schedule, int value) {
 		
 		this.name = name;
-		this.level = level;
+		//this.level = level;
 		this.capacity = capacity;
 		this.studentAge = studentAge;
 		//this.teacher = teacher;
@@ -39,7 +39,7 @@ public class Group implements Comparable<Group>{
 		this.name = name;
 	}
 	
-	public void setLevel(int level)
+	public void setLevel(Level level)
 	{
 		this.level = level;		
 	}
@@ -84,7 +84,7 @@ public class Group implements Comparable<Group>{
 		return this.name;
 	}
 	
-	public int getLevel()
+	public Level getLevel()
 	{
 		return this.level;		
 	}
@@ -140,7 +140,7 @@ public class Group implements Comparable<Group>{
 	
 	private void countValue() {
 		
-		int value = this.level + (this.capacity*3) + this.studentAge + this.teacher.getValue();
+		int value = this.level.getValue() + (this.capacity*3) + this.studentAge + this.teacher.getValue();
 		
 		this.value = value;
 	}
