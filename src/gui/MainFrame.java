@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -34,6 +35,8 @@ import javax.swing.KeyStroke;
 import javax.swing.JToolBar;
 
 import schedule.Group;
+import javax.swing.UIManager;
+import javax.swing.SwingConstants;
 
 public class MainFrame extends JFrame implements ToolBarInteface{
 
@@ -60,6 +63,11 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -284,8 +292,16 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 
 	private void setToolBar()
 	{
+		final Icon ADD_ICON = new ImageIcon("res/gui/add.png");
 		JPanel toolBar = new JPanel();
-		JButton btnNewButton = new JButton("Main Button");
+		JButton btnNewButton = new JButton();
+		btnNewButton.setBorderPainted(false);
+		btnNewButton.setBorder(null);
+		btnNewButton.setHorizontalAlignment(SwingConstants.LEFT);
+		btnNewButton.setIcon(new ImageIcon(MainFrame.class.getResource("/gui/add.png")));
+		btnNewButton.setFocusable(false);
+		btnNewButton.setFocusPainted( false );
+		btnNewButton.setMargin(new Insets(0, 0, 0, 0));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				GroupsDialog gd;

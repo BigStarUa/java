@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Window;
 
+import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultDesktopManager;
@@ -16,12 +17,20 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -34,6 +43,7 @@ import schedule.Level;
 import schedule.LevelDAO;
 import schedule.Teacher;
 import schedule.TeacherDAO;
+import javax.swing.JFormattedTextField;
 
 public class GroupsDialog extends JDialog implements ActionListener{
 
@@ -74,6 +84,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 	}
 	
 	public GroupsDialog() {
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		initContent();
 	}
 	
@@ -125,40 +136,40 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		
 		lblName = new JLabel("Name:");
 		lblName.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblName.setBounds(10, 11, 86, 20);
+		lblName.setBounds(21, 22, 86, 20);
 		contentPanel.add(lblName);
 		
 		lblLevel = new JLabel("Level:");
 		lblLevel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblLevel.setBounds(10, 40, 86, 20);
+		lblLevel.setBounds(21, 51, 86, 20);
 		contentPanel.add(lblLevel);
 		{
 			lblCapacity = new JLabel("Capacity:");
 			lblCapacity.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblCapacity.setBounds(10, 71, 86, 20);
+			lblCapacity.setBounds(21, 82, 86, 20);
 			contentPanel.add(lblCapacity);
 		}
 		{
 			lblStudentAge = new JLabel("Student Age:");
 			lblStudentAge.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblStudentAge.setBounds(10, 102, 86, 20);
+			lblStudentAge.setBounds(21, 113, 86, 20);
 			contentPanel.add(lblStudentAge);
 		}
 		{
 			lblTeacher = new JLabel("Teacher:");
 			lblTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblTeacher.setBounds(10, 133, 86, 20);
+			lblTeacher.setBounds(21, 144, 86, 20);
 			contentPanel.add(lblTeacher);
 		}
 		{
 			lblSchedule = new JLabel("Schedule:");
 			lblSchedule.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblSchedule.setBounds(10, 164, 86, 20);
+			lblSchedule.setBounds(21, 175, 86, 20);
 			contentPanel.add(lblSchedule);
 		}
 		
 		txtName = new JTextField();
-		txtName.setBounds(106, 13, 150, 20);
+		txtName.setBounds(117, 24, 150, 20);
 		txtName.setText(this.name);
 		contentPanel.add(txtName);
 		txtName.setColumns(10);
@@ -166,12 +177,22 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			txtCapacity = new JTextField();
 			txtCapacity.setColumns(10);
 			txtCapacity.setText(String.valueOf(this.capacity));
-			txtCapacity.setBounds(106, 73, 150, 20);
+			txtCapacity.setBounds(117, 84, 150, 20);
+			txtCapacity.addKeyListener(new KeyAdapter()
+			{
+			public void keyTyped(KeyEvent ke)
+			{
+				char c = ke.getKeyChar();
+				if (!Character.isDigit(c))
+				ke.consume(); // prevent event propagation
+			}
+			}); 
 			contentPanel.add(txtCapacity);
 		}
 
 			LevelDAO lDAO = new LevelDAO(db.connection);
 			cbLevel = new JComboBox();
+			//cbLevel.setBorder(BorderFactory.createMatteBorder(0,0,1,1,Color.BLACK));
 			if(this.level_id < 1)
 			{
 				Level l = new Level();
@@ -189,13 +210,13 @@ public class GroupsDialog extends JDialog implements ActionListener{
 				}
 			}
 			cbLevel.setRenderer(new ComboBoxRenderer());
-			cbLevel.setBounds(106, 42, 150, 20);
+			cbLevel.setBounds(117, 53, 150, 20);
 			contentPanel.add(cbLevel);
 		
 		
 		
 		cbStudentAge = new JComboBox();
-		cbStudentAge.setBounds(106, 104, 150, 20);
+		cbStudentAge.setBounds(117, 115, 150, 20);
 		contentPanel.add(cbStudentAge);
 		
 		TeacherDAO tDAO = new TeacherDAO(db.connection);
@@ -217,8 +238,10 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			}
 		}
 		cbTeacher.setRenderer(new ComboBoxRenderer());
-		cbTeacher.setBounds(106, 135, 150, 20);
+		cbTeacher.setBounds(117, 146, 150, 20);
 		contentPanel.add(cbTeacher);
+						
+		
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -288,6 +311,14 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		return check;
 	}
 	
+	private int getValue(String text) {
+	    try {
+	      return Integer.parseInt(text);
+	    } catch (NumberFormatException e) {
+	      return 0;
+	    }
+	  }
+	
 	private void fillGroup()
 	{
 		this.group.setName(txtName.getText());
@@ -301,5 +332,4 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		// TODO Auto-generated method stub
 	
 	}
-		
 }
