@@ -1,8 +1,8 @@
 package gui;
 
-import javax.swing.JPanel;
+import javax.swing.JToolBar;
 
 public interface ToolBarInteface {
 	
-	    public JPanel getToolbar();
+	    public JToolBar getToolbar();
 }

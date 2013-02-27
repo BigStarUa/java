@@ -1,5 +1,7 @@
 package gui;
 
+import gui.res.StaticRes;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -37,6 +39,7 @@ import javax.swing.JToolBar;
 import schedule.Group;
 import javax.swing.UIManager;
 import javax.swing.SwingConstants;
+import java.awt.Dimension;
 
 public class MainFrame extends JFrame implements ToolBarInteface{
 
@@ -53,11 +56,13 @@ public class MainFrame extends JFrame implements ToolBarInteface{
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTabbedPane tabbedPane;
-    private javax.swing.JToolBar toolBar;
+    private javax.swing.JPanel toolBar;
     // End of variables declaration   
 
-	private JPanel toolBarPanel;
+	private JToolBar toolBarPanel;
 	JFrame mainFrame = null;
+
+	private JPanel panel;
 
 	/**
 	 * Launch the application.
@@ -178,11 +183,11 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	    c.getActionMap().put("closeTab", closeTabAction);
 	  }
 	  
-	  private void createTabButtonActionPerformed(java.awt.event.ActionEvent evt, JComponent newclass, String name) {                                                
+	  private void createTabButtonActionPerformed(java.awt.event.ActionEvent evt, JComponent newclass, String name, Icon icon) {                                                
 		    System.out.println("Add new tab!");
 		    //tabCount++;   
 		    //JScrollPane scrollPane = new JScrollPane(new GroupsGrid());	    
-		    Icon icon = PAGE_ICON;
+		    if(icon == null) icon = PAGE_ICON;
 		    addClosableTab(tabbedPane,  newclass, name, icon);
 		    
 		  } 
@@ -250,26 +255,45 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		menuBar.add(mnGridview);
 		
 		JMenuItem mntmGroups = new JMenuItem("Groups");
+		mntmGroups.setIcon(StaticRes.GROUP_ICON);
 		mntmGroups.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	if(!checkExistingTab(GroupsGrid.class.getName()))
             	{
-            		createTabButtonActionPerformed(evt, new GroupsGrid(), "Groups");
+            		createTabButtonActionPerformed(evt, new GroupsGrid(), "Groups", StaticRes.GROUP_ICON);
             	}
             }
         });
 		mnGridview.add(mntmGroups);
 		
-		JMenuItem mntmRooms = new JMenuItem("Rooms");
+		JMenuItem mntmRooms = new JMenuItem("Classes");
+		mntmRooms.setIcon(StaticRes.CLASS_ICON);
 		mntmRooms.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	if(!checkExistingTab(RoomsGrid.class.getName()))
             	{
-            		createTabButtonActionPerformed(evt, new RoomsGrid(), "Rooms");
+            		createTabButtonActionPerformed(evt, new RoomsGrid(), "Classes", StaticRes.CLASS_ICON);
             	}
             }
         });
 		mnGridview.add(mntmRooms);
+		
+		JMenuItem mntmTeachers = new JMenuItem("Teachers");
+		mntmTeachers.setIcon(StaticRes.TEACHER_ICON);
+		mnGridview.add(mntmTeachers);
+		
+		JMenuItem mntmSchedule = new JMenuItem("Schedule");
+		mntmSchedule.setIcon(StaticRes.SCHEDULE_ICON);
+		mntmSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(ScheduleGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new ScheduleGrid(), "Schedule", StaticRes.SCHEDULE_ICON);
+            	}
+            }
+        });
+		mnGridview.add(mntmSchedule);
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -282,26 +306,34 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		
 		tabbedPane.addChangeListener(changeListener);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
-		
-		toolBar = new JToolBar();
+				
+		toolBar = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) toolBar.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
 		contentPane.add(toolBar, BorderLayout.NORTH);
-		
 		setToolBar();
 		toolBar.add(this.toolBarPanel);
 	}
 
 	private void setToolBar()
 	{
-		final Icon ADD_ICON = new ImageIcon("res/gui/add.png");
-		JPanel toolBar = new JPanel();
+		JToolBar toolBar = new JToolBar();
+		
+//		FlowLayout flowLayout = (FlowLayout) toolBar.getLayout();
+//		flowLayout.setAlignment(FlowLayout.LEFT);
 		JButton btnNewButton = new JButton();
+		btnNewButton.setFocusable(false);
+		btnNewButton.setOpaque(false);
+		btnNewButton.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnNewButton.setMargin(new Insets(2, 24, 2, 14));
+		btnNewButton.setPreferredSize(new Dimension(43, 43));
+		btnNewButton.setMinimumSize(new Dimension(40, 40));
+		btnNewButton.setMaximumSize(new Dimension(40, 40));
 		btnNewButton.setBorderPainted(false);
 		btnNewButton.setBorder(null);
-		btnNewButton.setHorizontalAlignment(SwingConstants.LEFT);
-		btnNewButton.setIcon(new ImageIcon(MainFrame.class.getResource("/gui/add.png")));
-		btnNewButton.setFocusable(false);
+		btnNewButton.setIcon(StaticRes.ADD_ICON);
 		btnNewButton.setFocusPainted( false );
-		btnNewButton.setMargin(new Insets(0, 0, 0, 0));
+		btnNewButton.setRolloverEnabled(true);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				GroupsDialog gd;
@@ -321,7 +353,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	}
 	
 	@Override
-	public JPanel getToolbar() {
+	public JToolBar getToolbar() {
 		// TODO Auto-generated method stub
 		return this.toolBarPanel;
 	}

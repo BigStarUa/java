@@ -1,5 +1,7 @@
 package gui;
 
+import gui.res.StaticRes;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -34,7 +36,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 	 */
 	private static final long serialVersionUID = 1370998440094794537L;
 	private JTable table;
-	private JPanel toolBar;
+	private JToolBar toolBar;
 	private List<Group> groupList;
 
 	/**
@@ -127,8 +129,10 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 	
 	private void setToolBar()
 	{
-		JPanel toolBar = new JPanel();
-		JButton btnNewButton = new JButton("Add Group");
+		JToolBar toolBar = new JToolBar();
+		JButton btnNewButton = new JButton();
+		btnNewButton.setIcon(StaticRes.ADD_ICON);
+		btnNewButton.setToolTipText("Add Group");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				getDialog(new Group());
@@ -139,7 +143,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 		this.toolBar = toolBar;
 	}
 	
-	public JPanel getToolbar()
+	public JToolBar getToolbar()
 	{
 		return this.toolBar;
 	}

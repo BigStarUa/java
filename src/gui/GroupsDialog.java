@@ -1,24 +1,16 @@
 package gui;
 
+import gui.res.StaticRes;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Window;
 
-import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultDesktopManager;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import javax.swing.text.MaskFormatter;
-import javax.swing.text.NumberFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.Font;
@@ -26,13 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Vector;
+
 
 import javax.swing.JComboBox;
 
@@ -43,7 +30,14 @@ import schedule.Level;
 import schedule.LevelDAO;
 import schedule.Teacher;
 import schedule.TeacherDAO;
-import javax.swing.JFormattedTextField;
+import javax.swing.UIManager;
+import javax.swing.border.TitledBorder;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import javax.swing.JList;
+import javax.swing.AbstractListModel;
+import javax.swing.ListSelectionModel;
 
 public class GroupsDialog extends JDialog implements ActionListener{
 
@@ -68,7 +62,9 @@ public class GroupsDialog extends JDialog implements ActionListener{
 	private JLabel lblCapacity;
 	private JLabel lblStudentAge;
 	private JLabel lblTeacher;
-	private JLabel lblSchedule;
+	private JPanel panel;
+	private JLabel lblGroup;
+	private JPanel panel_1;
 
 	/**
 	 * Launch the application.
@@ -128,7 +124,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 	 * Create the dialog.
 	 */
 	private void initContent() {
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 450, 306);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -162,10 +158,39 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			contentPanel.add(lblTeacher);
 		}
 		{
-			lblSchedule = new JLabel("Schedule:");
-			lblSchedule.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblSchedule.setBounds(21, 175, 86, 20);
-			contentPanel.add(lblSchedule);
+			panel_1 = new JPanel();
+			panel_1.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Schedule", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+			panel_1.setBounds(277, 6, 155, 158);
+			contentPanel.add(panel_1);
+			panel_1.setLayout(null);
+			
+			JButton btnAdd = new JButton("Add");
+			btnAdd.setFocusTraversalKeysEnabled(false);
+			btnAdd.setFocusable(false);
+			btnAdd.setFocusPainted(false);
+			btnAdd.setPreferredSize(new Dimension(30, 23));
+			btnAdd.setMargin(new Insets(2, 2, 2, 2));
+			btnAdd.setMaximumSize(new Dimension(40, 23));
+			btnAdd.setMinimumSize(new Dimension(30, 23));
+			btnAdd.setAlignmentX(Component.CENTER_ALIGNMENT);
+			btnAdd.setBounds(95, 11, 50, 23);
+			btnAdd.setIcon(StaticRes.ADD16_ICON);
+			panel_1.add(btnAdd);
+			
+			JList list = new JList();
+			list.setVisibleRowCount(5);
+			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			list.setModel(new AbstractListModel() {
+				String[] values = new String[] {"asd", "dfgdf", "dfg", "dfg"};
+				public int getSize() {
+					return values.length;
+				}
+				public Object getElementAt(int index) {
+					return values[index];
+				}
+			});
+			list.setBounds(10, 40, 135, 107);
+			panel_1.add(list);
 		}
 		
 		txtName = new JTextField();
@@ -240,6 +265,19 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		cbTeacher.setRenderer(new ComboBoxRenderer());
 		cbTeacher.setBounds(117, 146, 150, 20);
 		contentPanel.add(cbTeacher);
+		{
+			panel = new JPanel();
+			panel.setBorder(UIManager.getBorder("MenuBar.border"));
+			FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			getContentPane().add(panel, BorderLayout.NORTH);
+			{
+				lblGroup = new JLabel("Group");
+				lblGroup.setFont(new Font("Tahoma", Font.PLAIN, 18));
+				lblGroup.setIcon(StaticRes.GROUP48_ICON);
+				panel.add(lblGroup);
+			}
+		}
 						
 		
 		{
@@ -248,6 +286,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
+				okButton.setIcon(StaticRes.OK_ICON);
 				okButton.setActionCommand("OK");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -268,6 +307,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			{
 				JButton cancelButton = new JButton("Cancel");
 				cancelButton.setActionCommand("Cancel");
+				cancelButton.setIcon(StaticRes.CANCEL_ICON);
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						System.out.println("Cancel Clicked!");
