@@ -7,9 +7,12 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Window;
 
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -18,6 +21,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -28,6 +34,8 @@ import schedule.Group;
 import schedule.GroupDAO;
 import schedule.Level;
 import schedule.LevelDAO;
+import schedule.Schedule;
+import schedule.ScheduleDAO;
 import schedule.Teacher;
 import schedule.TeacherDAO;
 import javax.swing.UIManager;
@@ -39,7 +47,7 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 import javax.swing.ListSelectionModel;
 
-public class GroupsDialog extends JDialog implements ActionListener{
+public class GroupsDialog extends JDialog implements ActionListener, ScheduleResultListener{
 
 	/**
 	 * 
@@ -57,6 +65,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 	private int level_id;
 	private int teacher_id;
 	private int capacity;
+	private List<Schedule> schedule_list = new ArrayList<Schedule>();
 	private JLabel lblName;
 	private JLabel lblLevel;
 	private JLabel lblCapacity;
@@ -65,6 +74,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 	private JPanel panel;
 	private JLabel lblGroup;
 	private JPanel panel_1;
+	private JList list;
 
 	/**
 	 * Launch the application.
@@ -107,6 +117,14 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			this.level_id = this.group.getLevel().getId();
 			this.teacher_id = this.group.getTeacher().getId();
 			this.capacity = this.group.getCapacity();
+			this.schedule_list = this.group.getSchedule();
+			
+//			ScheduleDAO sDAO = new ScheduleDAO(db.connection);
+//			for(Integer id : this.group.getSchedule())
+//			{
+//				Schedule s = sDAO.getSchedule(id);
+//				this.schedule_list.add(s);
+//			}
 		}
 		//cbLevel
 	}
@@ -173,24 +191,74 @@ public class GroupsDialog extends JDialog implements ActionListener{
 			btnAdd.setMaximumSize(new Dimension(40, 23));
 			btnAdd.setMinimumSize(new Dimension(30, 23));
 			btnAdd.setAlignmentX(Component.CENTER_ALIGNMENT);
-			btnAdd.setBounds(95, 11, 50, 23);
+			btnAdd.setBounds(10, 13, 67, 23);
 			btnAdd.setIcon(StaticRes.ADD16_ICON);
+			btnAdd.addActionListener(new java.awt.event.ActionListener() {
+	            public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	ScheduleSelectDialog ssd;
+					try {
+						ssd = new ScheduleSelectDialog(null, "", ModalityType.DOCUMENT_MODAL, GroupsDialog.this);
+						ssd.setVisible(true);
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	            }
+	        });
 			panel_1.add(btnAdd);
 			
-			JList list = new JList();
+			DefaultListModel listModel = new DefaultListModel();
+
+			for(Schedule obj : this.schedule_list)
+			{
+				listModel.addElement(obj);
+			}
+			list = new JList(listModel);
 			list.setVisibleRowCount(5);
 			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			list.setModel(new AbstractListModel() {
-				String[] values = new String[] {"asd", "dfgdf", "dfg", "dfg"};
-				public int getSize() {
-					return values.length;
-				}
-				public Object getElementAt(int index) {
-					return values[index];
+			list.setCellRenderer(new ListCellRenderer() {
+				
+				protected DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
+				@Override
+				public Component getListCellRendererComponent(JList list, Object o,
+						int i, boolean selected, boolean cellHasFocus) {
+					// TODO Auto-generated method stub
+					
+					//JLabel label = new JLabel();
+					JLabel label = (JLabel) defaultRenderer.getListCellRendererComponent(list, o, i,
+							selected, cellHasFocus);
+					
+	                Schedule schedule = (Schedule) o;
+	                label.setText(schedule.getName());
+	                
+	                return label;
 				}
 			});
 			list.setBounds(10, 40, 135, 107);
 			panel_1.add(list);
+			
+			JButton btnRemove = new JButton("Remove");
+			btnRemove.setBounds(78, 13, 67, 23);
+			btnRemove.setFocusTraversalKeysEnabled(false);
+			btnRemove.setFocusable(false);
+			btnRemove.setFocusPainted(false);
+			btnRemove.setPreferredSize(new Dimension(30, 23));
+			btnRemove.setMargin(new Insets(2, 2, 2, 2));
+			btnRemove.setMaximumSize(new Dimension(40, 23));
+			btnRemove.setMinimumSize(new Dimension(30, 23));
+			btnRemove.setAlignmentX(Component.CENTER_ALIGNMENT);
+			btnRemove.setIcon(StaticRes.DELETE16_ICON);
+			btnRemove.addActionListener(new java.awt.event.ActionListener() {
+	            public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	int index = list.getSelectedIndex();
+	            	Schedule schedule = (Schedule)list.getSelectedValue();
+	            	if(index >= 0)
+	            	{
+	            		((DefaultListModel) list.getModel()).removeElement(schedule);
+	            	}
+	            }
+	        });
+			panel_1.add(btnRemove);
 		}
 		
 		txtName = new JTextField();
@@ -319,6 +387,7 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		}
 	}
 	
+	
 	private boolean saveGroup()
 	{
 		boolean check = true;
@@ -351,25 +420,49 @@ public class GroupsDialog extends JDialog implements ActionListener{
 		return check;
 	}
 	
-	private int getValue(String text) {
-	    try {
-	      return Integer.parseInt(text);
-	    } catch (NumberFormatException e) {
-	      return 0;
-	    }
-	  }
-	
 	private void fillGroup()
 	{
 		this.group.setName(txtName.getText());
 		this.group.setCapacity(Integer.parseInt(txtCapacity.getText()));
 		this.group.setTeacher((Teacher)cbTeacher.getSelectedItem());
 		this.group.setLevel((Level)cbLevel.getSelectedItem());
+		
+		List<Schedule> newList = new ArrayList<Schedule>();
+		for(int i=0; i < list.getModel().getSize(); i++)
+		{
+			Schedule schedule = (Schedule)((DefaultListModel) list.getModel()).getElementAt(i);
+			
+			if(this.schedule_list.contains(schedule)){
+				this.schedule_list.remove(schedule);
+				//newList.add(schedule);
+			}else{
+				schedule.setStatus(1);
+				this.schedule_list.add(schedule);
+			}
+		}
+		
+		
+//		Collection<Schedule> similar = new HashSet<Schedule>( this.schedule_list );
+//        Collection<Schedule> different = new HashSet<Schedule>();
+//        different.addAll( this.schedule_list );
+//        different.addAll( newList );
+//
+//        similar.retainAll( newList );
+//        different.removeAll( similar );
+		
+		this.group.setSchedule(this.schedule_list);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 	
+	}
+
+	@Override
+	public void returnSchedule(Schedule schedule) {
+		// TODO Auto-generated method stub
+		((DefaultListModel) list.getModel()).addElement(schedule);
+		System.out.println(schedule.getName());
 	}
 }

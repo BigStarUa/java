@@ -24,7 +24,7 @@ public class GroupDAO {
 		group.setCapacity(rs.getInt("capacity"));
 		group.setStudentAge(rs.getInt("stud_age"));
 		group.setTeacher(getTeacher(rs.getInt("teacher")));
-		group.setSchedule(rs.getInt("schedule"));
+		group.setSchedule(getScheduleListFromGroup(rs.getInt("id")));
 		group.setValue(rs.getInt("value"));
 		return group;
 		
@@ -42,6 +42,28 @@ public class GroupDAO {
 		TeacherDAO teacherDAO = new TeacherDAO(con);
 		Teacher teacher = teacherDAO.getTeacher(id);
 		return teacher;
+	}
+	
+	private List<Schedule> getScheduleListFromGroup(int id)
+	{
+		List<Schedule> list = new ArrayList<Schedule>();
+		ScheduleDAO scheduleDAO = new ScheduleDAO(con);
+		
+		try {
+			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM group_schedule WHERE group_id=" + id );
+			while(rs.next())
+			{
+				Schedule schedule = scheduleDAO.getSchedule(rs.getInt("schedule_id"));
+				list.add(schedule);				
+			}
+			rs.close();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return list;	
 	}
 	
 	public Group getGroup(int id)
@@ -88,6 +110,7 @@ public class GroupDAO {
 		return list;		
 	}
 	
+
 	public void updateGroup(Group group)
 	{
 		try
@@ -96,20 +119,42 @@ public class GroupDAO {
 			if(group.getId()>0)
 			{
 				ps = con.prepareStatement( "UPDATE groups SET name=?, level=?, capacity=?," +
-						" stud_age=?, teacher=?, schedule=? WHERE id=?" );
-		    	ps.setInt( 7, group.getId() );
+						" stud_age=?, teacher=? WHERE id=?" );
+		    	ps.setInt( 6, group.getId() );
 				
 			}else{
 				ps = con.prepareStatement( "INSERT INTO groups (name, level, capacity," +
-						" stud_age, teacher, schedule) VALUES (?,?,?,?,?,?)" );	
+						" stud_age, teacher) VALUES (?,?,?,?,?)" );	
 			}
 			ps.setString( 1, group.getName());
 		    ps.setInt( 2, group.getLevel().getId() );
 		    ps.setInt( 3, group.getCapacity() );
 		    ps.setInt( 4, group.getStudentAge() );
 		    ps.setInt( 5, group.getTeacher().getId() );
-		    ps.setInt( 6, group.getSchedule() );
+		    //ps.setInt( 6, group.getSchedule() );
 		    ps.executeUpdate();
+		    
+		    
+
+		    for(Schedule item : group.getSchedule())
+		    {
+		    	if(item.getStatus() == Schedule.STATUS_NEW)
+		    	{
+		    		ps = con.prepareStatement( "INSERT INTO group_schedule" +
+		    				" (group_id, schedule_id) VALUES (?,?)" );	
+					ps.setInt( 1, group.getId());
+				    ps.setInt( 2, item.getId() );
+				    ps.executeUpdate();
+		    		
+		    	}else{
+		    		
+		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE id=?" );
+		  	    	ps.setInt( 1, item.getId() );
+		  	    	ps.executeUpdate();
+		    	}
+		    	
+		    }
+		    
 		    ps.close();
 	    }
 		catch( SQLException e )

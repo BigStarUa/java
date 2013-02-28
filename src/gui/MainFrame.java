@@ -319,8 +319,6 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	{
 		JToolBar toolBar = new JToolBar();
 		
-//		FlowLayout flowLayout = (FlowLayout) toolBar.getLayout();
-//		flowLayout.setAlignment(FlowLayout.LEFT);
 		JButton btnNewButton = new JButton();
 		btnNewButton.setFocusable(false);
 		btnNewButton.setOpaque(false);

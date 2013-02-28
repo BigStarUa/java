@@ -1,5 +1,7 @@
 package schedule;
 
+import java.util.List;
+
 public class Group implements Comparable<Group>{
 	
 	private int id;
@@ -9,7 +11,7 @@ public class Group implements Comparable<Group>{
 	private int value;
 	private int studentAge;
 	private Teacher teacher;
-	private int schedule;
+	private List<Schedule> schedule;
 	private Room room;
 	
 	public Group(String name, int level, int capacity,
@@ -20,7 +22,7 @@ public class Group implements Comparable<Group>{
 		this.capacity = capacity;
 		this.studentAge = studentAge;
 		//this.teacher = teacher;
-		this.schedule = schedule;
+		//this.schedule = schedule;
 		this.value = value;
 		//countValue();
 	}
@@ -59,9 +61,9 @@ public class Group implements Comparable<Group>{
 		this.teacher = teacher;
 	}
 	
-	public void setSchedule(int schedule)
+	public void setSchedule(List<Schedule> list)
 	{
-		this.schedule = schedule;
+		this.schedule = list;
 	}
 	
 	public void setValue(int value)
@@ -104,7 +106,7 @@ public class Group implements Comparable<Group>{
 		return this.teacher;
 	}
 	
-	public int getSchedule()
+	public List<Schedule> getSchedule()
 	{
 		return this.schedule;
 	}

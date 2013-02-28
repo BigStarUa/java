@@ -23,7 +23,8 @@ public class ScheduleDAO {
 		Schedule schedule = new Schedule();
 		schedule.setId(rs.getInt("id"));
 		schedule.setName(rs.getString("name"));
-		schedule.setWeekDay(rs.getString("week_day"));		
+		schedule.setWeekDay(rs.getString("week_day"));	
+		schedule.setStatus(Schedule.STATUS_OLD);	
 		return schedule;
 	}
 	
@@ -67,11 +68,14 @@ public class ScheduleDAO {
 	}
 	
 
-	public List<ComboBoxInterface> getComboBoxInterfaceList()
+	public List<Schedule> getScheduleByDayList(String day)
 	{
-		List<ComboBoxInterface> list = new ArrayList<ComboBoxInterface>();
+		List<Schedule> list = new ArrayList<Schedule>();
 		try {
-			ResultSet rs = con.createStatement().executeQuery("SELECT * FROM schedule");
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=?");
+			ps.setString(1, day);
+			
+			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next())
 			{
