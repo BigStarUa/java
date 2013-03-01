@@ -45,9 +45,9 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 
 	private JPanel contentPane;
 	
-	private static final Icon CLOSE_TAB_ICON = new ImageIcon("res/gui/closeTabButton.png");
-	private static final Icon CLOSE_TAB_ICON_HOVER = new ImageIcon("res/gui/closeTabButtonHover.png");
-	private static final Icon PAGE_ICON = new ImageIcon("res/gui/1361500543_page_edit.png");
+	private static final Icon CLOSE_TAB_ICON = StaticRes.CLOSE_TAB_ICON;
+	private static final Icon CLOSE_TAB_ICON_HOVER = StaticRes.CLOSE_TAB_ICON_HOVER;
+	private static final Icon PAGE_ICON = StaticRes.PAGE_ICON;
 	private int tabCount = 0;
 	
 	// Variables declaration - do not modify                    
@@ -334,14 +334,14 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		btnNewButton.setRolloverEnabled(true);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				GroupsDialog gd;
-				try {
-					gd = new GroupsDialog(MainFrame.this, "", Dialog.ModalityType.DOCUMENT_MODAL, new Group());
-					gd.setVisible(true);
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				GroupsDialog gd;
+//				try {
+//					gd = new GroupsDialog(MainFrame.this, "", Dialog.ModalityType.DOCUMENT_MODAL, new Group());
+//					gd.setVisible(true);
+//				} catch (ClassNotFoundException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				
 			}
 		});

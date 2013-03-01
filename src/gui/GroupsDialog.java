@@ -34,6 +34,7 @@ import schedule.Group;
 import schedule.GroupDAO;
 import schedule.Level;
 import schedule.LevelDAO;
+import schedule.ResultListener;
 import schedule.Schedule;
 import schedule.ScheduleDAO;
 import schedule.Teacher;
@@ -75,6 +76,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private JLabel lblGroup;
 	private JPanel panel_1;
 	private JList list;
+	private ResultListener result;
 
 	/**
 	 * Launch the application.
@@ -98,8 +100,10 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	 * Create the dialog.
 	 * @throws ClassNotFoundException 
 	 */
-	public GroupsDialog(Window owner, String title, ModalityType modalityType, Group group) throws ClassNotFoundException {
+	public GroupsDialog(Window owner, String title, ModalityType modalityType, Group group, ResultListener result) throws ClassNotFoundException {
 		super(owner, title, modalityType);
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		this.result = result;
 		db = new DbHelper();
 		this.group = group;
 		populateForm();
@@ -197,7 +201,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	            public void actionPerformed(java.awt.event.ActionEvent evt) {
 	            	ScheduleSelectDialog ssd;
 					try {
-						ssd = new ScheduleSelectDialog(null, "", ModalityType.DOCUMENT_MODAL, GroupsDialog.this);
+						ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this);
 						ssd.setVisible(true);
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
@@ -363,6 +367,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 						if(saveGroup())
 						{
 							dispose();
+							result.returnObject(GroupsDialog.this.group);
 						}else{
 							//AboutDialog dlg = new AboutDialog(null, "Error", "Error");
 						}
@@ -415,7 +420,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		if(check)
 		{
 			GroupDAO groupDAO = new GroupDAO(db.connection);
-			groupDAO.updateGroup(this.group);
+			groupDAO.updateGroup(this.group, this.schedule_list);
 		}
 		return check;
 	}
@@ -431,26 +436,17 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		for(int i=0; i < list.getModel().getSize(); i++)
 		{
 			Schedule schedule = (Schedule)((DefaultListModel) list.getModel()).getElementAt(i);
-			
+			newList.add(schedule);
 			if(this.schedule_list.contains(schedule)){
 				this.schedule_list.remove(schedule);
-				//newList.add(schedule);
 			}else{
 				schedule.setStatus(1);
 				this.schedule_list.add(schedule);
 			}
 		}
+
 		
-		
-//		Collection<Schedule> similar = new HashSet<Schedule>( this.schedule_list );
-//        Collection<Schedule> different = new HashSet<Schedule>();
-//        different.addAll( this.schedule_list );
-//        different.addAll( newList );
-//
-//        similar.retainAll( newList );
-//        different.removeAll( similar );
-		
-		this.group.setSchedule(this.schedule_list);
+		this.group.setSchedule(newList);
 	}
 
 	@Override

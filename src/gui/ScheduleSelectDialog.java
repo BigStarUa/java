@@ -12,9 +12,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -23,6 +25,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -31,8 +34,13 @@ import schedule.Room;
 import schedule.Schedule;
 import schedule.ScheduleDAO;
 import schedule.ScheduleTableModel;
+import schedule.Teacher;
+import schedule.TeacherDAO;
 
 import javax.swing.JTabbedPane;
+import java.awt.Component;
+import javax.swing.JComboBox;
+import java.awt.Dimension;
 
 public class ScheduleSelectDialog extends JDialog implements ActionListener{
 
@@ -107,14 +115,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		
-		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		//tabbedPane.addTab("Monday", null);
-//		tabbedPane.addTab("Tuesday", null);
-//		tabbedPane.addTab("Wednesday", null);
-//		tabbedPane.addTab("Thursday", null);
-//		tabbedPane.addTab("Friday", null);
-//		tabbedPane.addTab("Saturday", null);
-//		tabbedPane.addTab("Sunday", null);
+		tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
 		
 		contentPanel.add(tabbedPane, BorderLayout.CENTER);
 		
@@ -129,6 +130,27 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		lblSchedule.setIcon(StaticRes.SCHEDULE48_ICON);
 		lblSchedule.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		panel.add(lblSchedule);
+		
+		JPanel panel_1 = new JPanel();
+		panel.add(panel_1);
+		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		JLabel lblTeacher = new JLabel("Teacher:");
+		lblTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblTeacher.setBorder(new EmptyBorder(0, 40, 0, 0));
+		panel_1.add(lblTeacher);
+		
+		JComboBox cbTeacher = new JComboBox();
+		cbTeacher.setPreferredSize(new Dimension(150, 20));
+		cbTeacher.setMinimumSize(new Dimension(100, 20));
+		
+		TeacherDAO teacherDAO = new TeacherDAO(db.connection);
+		List<Teacher> teachersList = teacherDAO.getTeachersList();
+		
+		cbTeacher.setModel(teacherModel(teachersList.toArray()));
+		cbTeacher.setRenderer(teacherRenderer());
+		cbTeacher.setSelectedIndex(0);
+		panel_1.add(cbTeacher);
 		
 		{
 			JPanel buttonPane = new JPanel();
@@ -168,6 +190,49 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			}
 		}
 	}
+	private DefaultComboBoxModel teacherModel(Object[] list)
+	{
+		DefaultComboBoxModel comboModel = new DefaultComboBoxModel(list)
+		{
+			
+		};
+		Teacher t = new Teacher();
+		t.setName("Select teacher");
+		t.setId(0);
+		comboModel.insertElementAt(t, 0);
+		return comboModel;
+	}
+	
+	private BasicComboBoxRenderer teacherRenderer()
+	{
+		BasicComboBoxRenderer renderer = 
+		new BasicComboBoxRenderer(){
+			public Component getListCellRendererComponent(
+			        JList list, Object value, int index,
+			        boolean isSelected, boolean cellHasFocus)
+			    {
+			        super.getListCellRendererComponent(list, value, index,
+			            isSelected, cellHasFocus);
+
+			        if (value != null)
+			        {
+			            Teacher item = (Teacher)value;
+			            setText( item.getName() );
+			        }
+
+			        if (index == -1)
+			        {
+			        	//ComboBoxInterface item = (ComboBoxInterface)value;
+			            //setText( "None" );
+			        }
+
+
+			        return this;
+			    }
+		};
+		return renderer;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub

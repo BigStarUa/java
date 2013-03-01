@@ -4,6 +4,7 @@ import gui.res.StaticRes;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Window;
 
@@ -13,11 +14,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
 import schedule.DbHelper;
 import schedule.Group;
 import schedule.GroupDAO;
+import schedule.GroupTableModel;
+import schedule.ResultListener;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -25,12 +29,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicBorders;
 import javax.swing.plaf.basic.BasicBorders.MarginBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
 
-public class GroupsGrid extends JPanel implements ToolBarInteface{
+public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListener{
 	/**
 	 * 
 	 */
@@ -38,6 +46,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 	private JTable table;
 	private JToolBar toolBar;
 	private List<Group> groupList;
+	private GroupTableModel model;
 
 	/**
 	 * Create the panel.
@@ -55,28 +64,30 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 			db = new DbHelper();
 			GroupDAO groupDAO = new GroupDAO(db.connection);
 			groupList = groupDAO.getGroupList(1);
-			Object[] [] dataT = new Object[groupList.size()][5];
-			for(int i=0; i<groupList.size(); i++)
-			{
-				JLabel SkillLabel = new JLabel();
-				
-				Group g = groupList.get(i);
-				dataT[i][0] = " " + g.getName();
-				dataT[i][1] = " " + g.getLevel().getName();
-				dataT[i][2] = " " + g.getTeacher().getName();
-				dataT[i][3] = g.getCapacity();
-				dataT[i][4] = " " + g.getSchedule();
-			}
-			DefaultTableModel model = new DefaultTableModel(dataT, columnNames){
-				
-				 public boolean isCellEditable(int row, int column)
-				 {
-				     return false;
-				 }
-			};
+			model = new GroupTableModel(groupList);
 			
-			DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-			centerRenderer.setHorizontalAlignment( JLabel.CENTER);
+			TableCellRenderer tableRenderer = (new TableCellRenderer()
+			{
+				protected DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer();
+				
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					      boolean hasFocus, int row, int column) {
+						JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, value, isSelected,
+							      hasFocus, row, column);
+						Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
+						label.setText(value.toString());
+						label.setBorder(paddingBorder);
+						
+						//label.setBackground(Color.green);
+						
+//					    JTextField editor = new JTextField();
+//					    if (value != null)
+//					      editor.setText(value.toString());
+//					    editor.setBackground((row % 2 == 0) ? Color.white : Color.cyan);
+					    return label;
+					  }
+			}
+					);
 		
 			table = new JTable(model);
 			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -85,8 +96,9 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 			table.getColumnModel().getColumn(1).setPreferredWidth(50);
 			table.getColumnModel().getColumn(2).setPreferredWidth(50);
 			table.getColumnModel().getColumn(3).setPreferredWidth(17);
-			table.getColumnModel().getColumn(3).setCellRenderer( centerRenderer );
+			//table.getColumnModel().getColumn(3).setCellRenderer( centerRenderer );
 			table.setRowHeight(20);
+			table.setDefaultRenderer(Object.class, tableRenderer);
 			table.addMouseListener(new java.awt.event.MouseAdapter() {
 				
 				
@@ -118,7 +130,8 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 	{
 		GroupsDialog gd;
 		try {
-			gd = new GroupsDialog((Window)GroupsGrid.this.getRootPane().getParent(), "Edit Group", Dialog.ModalityType.DOCUMENT_MODAL, group);
+			gd = new GroupsDialog((Window)GroupsGrid.this.getRootPane().getParent(),
+					"Edit Group", Dialog.ModalityType.DOCUMENT_MODAL, group, GroupsGrid.this);
 			gd.setVisible(true);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -146,6 +159,21 @@ public class GroupsGrid extends JPanel implements ToolBarInteface{
 	public JToolBar getToolbar()
 	{
 		return this.toolBar;
+	}
+
+	@Override
+	public void returnObject(Object object) {
+		// TODO Auto-generated method stub
+		for(int i=0; i< model.getRowCount(); i++)
+		{
+			if(model.getValueAt(i, -1) == (Group)object)
+			{
+				model.setObjectAt(((Group)object), i, -1);
+				model.fireTableDataChanged();
+				table.repaint();
+			}
+		}
+		
 	}
 
 }

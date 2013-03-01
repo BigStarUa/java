@@ -111,7 +111,7 @@ public class GroupDAO {
 	}
 	
 
-	public void updateGroup(Group group)
+	public void updateGroup(Group group, List<Schedule> list)
 	{
 		try
 	    {
@@ -136,7 +136,7 @@ public class GroupDAO {
 		    
 		    
 
-		    for(Schedule item : group.getSchedule())
+		    for(Schedule item : list)
 		    {
 		    	if(item.getStatus() == Schedule.STATUS_NEW)
 		    	{
@@ -148,8 +148,10 @@ public class GroupDAO {
 		    		
 		    	}else{
 		    		
-		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE id=?" );
-		  	    	ps.setInt( 1, item.getId() );
+		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE" +
+		    				" group_id=? AND schedule_id=?" );
+		    		ps.setInt( 1, group.getId());
+				    ps.setInt( 2, item.getId() );
 		  	    	ps.executeUpdate();
 		    	}
 		    	
