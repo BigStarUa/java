@@ -1,6 +1,8 @@
 package schedule;
 
-public class Teacher {
+import gui.ComboBoxInterface;
+
+public class Teacher implements ComboBoxInterface{
 
 	int id;
 	String name;	
