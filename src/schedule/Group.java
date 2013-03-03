@@ -1,26 +1,29 @@
 package schedule;
 
+import java.util.List;
+
 public class Group implements Comparable<Group>{
 	
 	private int id;
 	private String name;
-	private int level;
+	private Level level;
 	private int capacity;
 	private int value;
 	private int studentAge;
-	private Teacher teacher;
-	private int schedule;
+	//private Teacher teacher;
+	private String teacher;
+	private List<Group_schedule> group_schedule;
 	private Room room;
 	
 	public Group(String name, int level, int capacity,
 			int studentAge, int teacher, int schedule, int value) {
 		
 		this.name = name;
-		this.level = level;
+		//this.level = level;
 		this.capacity = capacity;
 		this.studentAge = studentAge;
 		//this.teacher = teacher;
-		this.schedule = schedule;
+		//this.schedule = schedule;
 		this.value = value;
 		//countValue();
 	}
@@ -39,7 +42,7 @@ public class Group implements Comparable<Group>{
 		this.name = name;
 	}
 	
-	public void setLevel(int level)
+	public void setLevel(Level level)
 	{
 		this.level = level;		
 	}
@@ -54,14 +57,14 @@ public class Group implements Comparable<Group>{
 		this.studentAge = studentAge;
 	}
 	
-	public void setTeacher(Teacher teacher)
+	public void setTeacher(String teacher)
 	{
 		this.teacher = teacher;
 	}
 	
-	public void setSchedule(int schedule)
+	public void setSchedule(List<Group_schedule> list)
 	{
-		this.schedule = schedule;
+		this.group_schedule = list;
 	}
 	
 	public void setValue(int value)
@@ -84,7 +87,7 @@ public class Group implements Comparable<Group>{
 		return this.name;
 	}
 	
-	public int getLevel()
+	public Level getLevel()
 	{
 		return this.level;		
 	}
@@ -99,14 +102,14 @@ public class Group implements Comparable<Group>{
 		return this.studentAge;
 	}
 	
-	public Teacher getTeacher()
+	public String getTeacher()
 	{
 		return this.teacher;
 	}
 	
-	public int getSchedule()
+	public List<Group_schedule> getSchedule()
 	{
-		return this.schedule;
+		return this.group_schedule;
 	}
 	
 	public int getValue()
@@ -140,9 +143,9 @@ public class Group implements Comparable<Group>{
 	
 	private void countValue() {
 		
-		int value = this.level + (this.capacity*3) + this.studentAge + this.teacher.getValue();
+		//int value = this.level.getValue() + (this.capacity*3) + this.studentAge + this.teacher.getValue();
 		
-		this.value = value;
+		//this.value = value;
 	}
 	
 }

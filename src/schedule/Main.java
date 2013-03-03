@@ -21,7 +21,7 @@ public class Main{
 					String teacher = "";
 					if(g.getTeacher() != null)
 					{
-						teacher = g.getTeacher().getName();
+						teacher = g.getTeacher();
 					}
 					
 						System.out.println("Group: " + g.getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		

@@ -1,5 +1,7 @@
 package schedule;
 
+import gui.ComboBoxInterface;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,6 +63,26 @@ public class TeacherDAO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return list;
+	}
+	
+
+	public List<ComboBoxInterface> getComboBoxInterfaceList()
+	{
+		List<ComboBoxInterface> list = new ArrayList<ComboBoxInterface>();
+		try {
+			ResultSet rs = con.createStatement().executeQuery("SELECT * FROM teacher");
+			
+			while(rs.next())
+			{
+				list.add(getTeacherFromRS(rs));
+			}
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return list;
 	}
 	
