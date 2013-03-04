@@ -25,8 +25,10 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.text.MaskFormatter;
 
 import schedule.DbHelper;
+import schedule.GroupDAO;
 import schedule.ResultListener;
 import schedule.Schedule;
+import schedule.ScheduleDAO;
 import schedule.Teacher;
 
 import javax.swing.SwingConstants;
@@ -135,18 +137,16 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						
-						String h = ((String)frmtdtxtfldTime.getValue()).substring(0, 2);
-						//h.substring(0, 1);
-						
+						String h = ((String)frmtdtxtfldTime.getValue()).substring(0, 2);				
 						String m = ((String)frmtdtxtfldTime.getValue()).substring(3, 5);
-						//m.substring(3, 4);
+
 						if(Integer.valueOf(h) > 23 || Integer.valueOf(m) > 59)
 						{
 							System.out.println("Error");
 						}
 						else
 						{
-							fillSchedule();
+							fillAndSaveSchedule();
 							dispose();
 							listener.returnObject(schedule);
 						}
@@ -187,11 +187,14 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 		}
 	}
 	
-	private void fillSchedule()
+	private void fillAndSaveSchedule()
 	{
 		this.schedule.setName(txtName.getText());
 		this.schedule.setTime((String)frmtdtxtfldTime.getValue());
 		this.schedule.setWeekDay(cbWeekDay.getSelectedItem().toString());
+		
+		ScheduleDAO scheduleDAO = new ScheduleDAO(db.connection);
+		scheduleDAO.updateSchedule(this.schedule);
 	}
 	private DefaultComboBoxModel dayModel(Object[] list)
 	{

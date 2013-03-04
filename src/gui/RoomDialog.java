@@ -16,7 +16,11 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import schedule.DbHelper;
+import schedule.ResultListener;
 import schedule.Room;
+import schedule.RoomDAO;
+import schedule.ScheduleDAO;
+
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
@@ -33,6 +37,7 @@ public class RoomDialog extends JDialog implements ActionListener{
 	private JTextField txtValue;
 	private JPanel panel;
 	private JLabel lblClass;
+	private ResultListener listener;
 
 	public RoomDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -43,14 +48,26 @@ public class RoomDialog extends JDialog implements ActionListener{
 	 * Create the dialog.
 	 * @throws ClassNotFoundException 
 	 */
-	public RoomDialog(Window owner, String title, ModalityType modalityType, Room room) throws ClassNotFoundException {
+	public RoomDialog(Window owner, String title, ModalityType modalityType, Room room, ResultListener listener) throws ClassNotFoundException {
 		super(owner, title, modalityType);
 		db = new DbHelper();
 		this.room = room;
+		this.listener = listener;
 		//populateForm();
 		initContent();
-		
+		populateForm();
 		//addContent();
+	}
+	
+	private void populateForm()
+	{
+		if(this.room.getId() > 0)
+		{
+			txtName.setText(this.room.getName());
+			txtCapacity.setText(String.valueOf(this.room.getCapacity()));
+			txtValue.setText(String.valueOf(this.room.getValue()));		
+
+		}
 	}
 	
 	private void initContent()
@@ -113,7 +130,10 @@ public class RoomDialog extends JDialog implements ActionListener{
 				okButton.setActionCommand("OK");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						System.out.println("OK Clicked!");
+						
+						fillAndSaveSchedule();
+						dispose();
+						listener.returnObject(room);
 						//fillGroup();
 						//if(saveGroup())
 						//{
@@ -141,6 +161,23 @@ public class RoomDialog extends JDialog implements ActionListener{
 			}
 		}
 	}
+	
+	private void fillAndSaveSchedule()
+	{
+		this.room.setName(txtName.getText());
+		if(Integer.valueOf(txtCapacity.getText()) > 0)
+		{
+			this.room.setCapacity(Integer.valueOf(txtCapacity.getText()));
+		}
+		if(Integer.valueOf(txtValue.getText()) >= 0)
+		{
+			this.room.setValue(Integer.valueOf(txtValue.getText()));
+		}
+		
+		RoomDAO roomDAO = new RoomDAO(db.connection);
+		roomDAO.updateRoom(this.room);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub

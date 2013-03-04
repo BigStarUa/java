@@ -177,10 +177,13 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 	
 	private void setToolBar()
 	{
+		JTable tbl = getTableByTabIndex(tabbedPane.getSelectedIndex());
+		
 		JToolBar toolBar = new JToolBar();
 		JButton addButton = new JButton();
 		addButton.setIcon(StaticRes.ADD_ICON);
 		addButton.setToolTipText("Add schedule");
+		addButton.setFocusable(false);
 		addButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				getDialog(new Schedule(), ScheduleGrid.this.getTabTitle());
@@ -191,13 +194,16 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 		JButton editButton = new JButton();
 		editButton.setIcon(StaticRes.EDIT32_ICON);
 		editButton.setToolTipText("Edit schedule");
-		JTable t = getTableByTabTitle(getTabTitle());
-		if(t.getSelectedRow() > -1)
+		editButton.setFocusable(false);
+		editButton.setEnabled(false);
+
+		if(tbl.getSelectedRow() > -1)
 		{
-			System.out.println("Yesy");
+			editButton.setEnabled(true);
+			final Schedule schedule = (Schedule)tbl.getValueAt(tbl.getSelectedRow(), -1);
 			editButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					getDialog(new Schedule(), ScheduleGrid.this.getTabTitle());
+					getDialog(schedule, ScheduleGrid.this.getTabTitle());
 				}
 			});
 		}
@@ -225,6 +231,13 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 			}
 		}
 		return table;
+	}
+	
+	private JTable getTableByTabIndex(int index)
+	{
+		JScrollPane js = (JScrollPane)tabbedPane.getComponentAt(index);
+		JTable t = (JTable)js.getViewport().getComponent(0);
+		return t;
 	}
 	
 	@Override

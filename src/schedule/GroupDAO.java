@@ -99,10 +99,16 @@ public class GroupDAO {
 	
 	public List<Group> getGroupList(int schedule)
 	{
+		return null;
+		
+	}
+	
+	public List<Group> getGroupList()
+	{
 		List<Group> list = new ArrayList<Group>();
 		
 		try {
-			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM groups WHERE schedule=" + schedule );
+			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM groups");
 			while(rs.next())
 			{
 				list.add(getGroupFromRS(rs));				

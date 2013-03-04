@@ -22,6 +22,7 @@ import schedule.Group;
 import schedule.GroupDAO;
 import schedule.GroupTableModel;
 import schedule.ResultListener;
+import schedule.Schedule;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -47,23 +48,23 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 	private JToolBar toolBar;
 	private List<Group> groupList;
 	private GroupTableModel model;
+	private ToolBarInteface listener;
 
 	/**
 	 * Create the panel.
 	 */
-	public GroupsGrid() {
+	public GroupsGrid(ToolBarInteface listener) {
 		//FlowLayout flowLayout = (FlowLayout) getLayout();
 		setLayout(new  BorderLayout());
-		//Массив названий столбцов
-		  String[] columnNames = {"Name", "Level", "Teacher", "Quantity", "Schedule"};
-		  
+
+		  this.listener = listener;
 		  DbHelper db;
 		  groupList = null;
 		  
 		try {
 			db = new DbHelper();
 			GroupDAO groupDAO = new GroupDAO(db.connection);
-			groupList = groupDAO.getGroupList(1);
+			groupList = groupDAO.getGroupList();
 			model = new GroupTableModel(groupList);
 			
 			TableCellRenderer tableRenderer = (new TableCellRenderer()
@@ -105,6 +106,10 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 				        	getDialog(g);
 				        	System.out.println(row);
 				        }
+			    	 }else if(evt.getClickCount() == 1 && evt.getButton() == MouseEvent.BUTTON1)
+			    	 {
+			    		 setToolBar();
+					     GroupsGrid.this.listener.pushToolbar(toolBar);
 			    	 }
 			    }
 			});
@@ -146,6 +151,23 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 			}
 		});
 		toolBar.add(btnNewButton);
+		
+		JButton editButton = new JButton();
+		editButton.setIcon(StaticRes.EDIT32_ICON);
+		editButton.setToolTipText("Edit schedule");
+		editButton.setFocusable(false);
+		editButton.setEnabled(false);
+		if(table.getSelectedRow() > -1)
+		{
+			editButton.setEnabled(true);
+			final Group group = (Group)table.getValueAt(table.getSelectedRow(), -1);
+			editButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					getDialog(group);
+				}
+			});
+		}
+		toolBar.add(editButton);
 		
 		this.toolBar = toolBar;
 	}

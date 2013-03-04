@@ -252,7 +252,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	if(!checkExistingTab(GroupsGrid.class.getName()))
             	{
-            		createTabButtonActionPerformed(evt, new GroupsGrid(), "Groups", StaticRes.GROUP_ICON);
+            		createTabButtonActionPerformed(evt, new GroupsGrid(MainFrame.this), "Groups", StaticRes.GROUP_ICON);
             	}
             }
         });
@@ -264,7 +264,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	if(!checkExistingTab(RoomsGrid.class.getName()))
             	{
-            		createTabButtonActionPerformed(evt, new RoomsGrid(), "Classes", StaticRes.CLASS_ICON);
+            		createTabButtonActionPerformed(evt, new RoomsGrid(MainFrame.this), "Classes", StaticRes.CLASS_ICON);
             	}
             }
         });
