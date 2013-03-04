@@ -11,6 +11,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
@@ -32,6 +33,7 @@ import javax.swing.JComboBox;
 import schedule.DbHelper;
 import schedule.Group;
 import schedule.GroupDAO;
+import schedule.Group_schedule;
 import schedule.Level;
 import schedule.LevelDAO;
 import schedule.ResultListener;
@@ -64,9 +66,10 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private Group group;
 	private String name;
 	private int level_id;
-	private int teacher_id;
+	private String teacher;
 	private int capacity;
-	private List<Schedule> schedule_list = new ArrayList<Schedule>();
+	private List<String> teacher_list = new ArrayList<String>();
+	private List<Group_schedule> schedule_list = new ArrayList<Group_schedule>();
 	private JLabel lblName;
 	private JLabel lblLevel;
 	private JLabel lblCapacity;
@@ -77,6 +80,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private JPanel panel_1;
 	private JList list;
 	private ResultListener result;
+	private JLabel lblDispTeacher;
 
 	/**
 	 * Launch the application.
@@ -119,7 +123,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			//txtName.setText(this.group.getName());
 			this.name = this.group.getName();
 			this.level_id = this.group.getLevel().getId();
-			this.teacher_id = this.group.getTeacher().getId();
+			this.teacher = this.group.getTeacher();
 			this.capacity = this.group.getCapacity();
 			this.schedule_list = this.group.getSchedule();
 			
@@ -174,7 +178,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			contentPanel.add(lblStudentAge);
 		}
 		{
-			lblTeacher = new JLabel("Teacher:");
+			lblTeacher = new JLabel("Teacher(s):");
 			lblTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			lblTeacher.setBounds(21, 144, 86, 20);
 			contentPanel.add(lblTeacher);
@@ -201,7 +205,9 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	            public void actionPerformed(java.awt.event.ActionEvent evt) {
 	            	ScheduleSelectDialog ssd;
 					try {
-						ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this);
+						Group_schedule group_schedule = new Group_schedule();
+						group_schedule.setGroup(group.getId());
+						ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule);
 						ssd.setVisible(true);
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
@@ -213,9 +219,13 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			
 			DefaultListModel listModel = new DefaultListModel();
 
-			for(Schedule obj : this.schedule_list)
+			for(Group_schedule obj : this.schedule_list)
 			{
 				listModel.addElement(obj);
+//				if(!teacher_list.contains(obj.getTeacher().getName()))
+//				{
+//					teacher_list.add(obj.getTeacher().getName());
+//				}
 			}
 			list = new JList(listModel);
 			list.setVisibleRowCount(5);
@@ -232,8 +242,8 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 					JLabel label = (JLabel) defaultRenderer.getListCellRendererComponent(list, o, i,
 							selected, cellHasFocus);
 					
-	                Schedule schedule = (Schedule) o;
-	                label.setText(schedule.getName());
+					Group_schedule gschedule = (Group_schedule) o;
+	                label.setText(gschedule.getName());
 	                
 	                return label;
 				}
@@ -255,10 +265,11 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			btnRemove.addActionListener(new java.awt.event.ActionListener() {
 	            public void actionPerformed(java.awt.event.ActionEvent evt) {
 	            	int index = list.getSelectedIndex();
-	            	Schedule schedule = (Schedule)list.getSelectedValue();
+	            	Group_schedule gschedule = (Group_schedule)list.getSelectedValue();
 	            	if(index >= 0)
 	            	{
-	            		((DefaultListModel) list.getModel()).removeElement(schedule);
+	            		((DefaultListModel) list.getModel()).removeElement(gschedule);
+	            		lblDispTeacher.setText(getTeacher(getTeacherFromList()));
 	            	}
 	            }
 	        });
@@ -316,27 +327,32 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		cbStudentAge.setBounds(117, 115, 150, 20);
 		contentPanel.add(cbStudentAge);
 		
-		TeacherDAO tDAO = new TeacherDAO(db.connection);
-		cbTeacher = new JComboBox();
-		if(this.teacher_id < 1)
-		{
-			Teacher t = new Teacher();
-			t.setName("Select teacher");
-			t.setId(0);
-			cbTeacher.addItem(t);
-		}
-		List<Teacher> teacherList = tDAO.getTeachersList();
-		for(Teacher teacher : teacherList)
-		{
-			cbTeacher.addItem( teacher );
-			if(teacher.getId() == this.teacher_id)
-			{
-				cbTeacher.setSelectedItem( teacher );
-			}
-		}
-		cbTeacher.setRenderer(new ComboBoxRenderer());
-		cbTeacher.setBounds(117, 146, 150, 20);
-		contentPanel.add(cbTeacher);
+		lblDispTeacher = new JLabel(getTeacher(getTeacherFromList()));
+		lblDispTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDispTeacher.setBounds(117, 144, 150, 20);
+		contentPanel.add(lblDispTeacher);
+		
+//		TeacherDAO tDAO = new TeacherDAO(db.connection);
+//		cbTeacher = new JComboBox();
+//		if(this.teacher_id < 1)
+//		{
+//			Teacher t = new Teacher();
+//			t.setName("Select teacher");
+//			t.setId(0);
+//			cbTeacher.addItem(t);
+//		}
+//		List<Teacher> teacherList = tDAO.getTeachersList();
+//		for(Teacher teacher : teacherList)
+//		{
+//			cbTeacher.addItem( teacher );
+//			if(teacher.getId() == this.teacher_id)
+//			{
+//				cbTeacher.setSelectedItem( teacher );
+//			}
+//		}
+//		cbTeacher.setRenderer(new ComboBoxRenderer());
+//		cbTeacher.setBounds(117, 146, 150, 20);
+//		contentPanel.add(cbTeacher);
 		{
 			panel = new JPanel();
 			panel.setBorder(UIManager.getBorder("MenuBar.border"));
@@ -363,8 +379,8 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						System.out.println("OK Clicked!");
-						fillGroup();
-						if(saveGroup())
+						//fillGroup();
+						if(checkAndSaveGroup())
 						{
 							dispose();
 							result.returnObject(GroupsDialog.this.group);
@@ -393,34 +409,38 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	}
 	
 	
-	private boolean saveGroup()
+	private boolean checkAndSaveGroup()
 	{
 		boolean check = true;
-		if(this.group.getName().length() < 1)
+		String error = "";
+		if(txtName.getText().length() < 1)
 		{
 			lblName.setForeground(Color.RED);
+			error += " - Name \n";
 			check = false;
 		}else lblName.setForeground(Color.BLACK);
-		if(this.group.getCapacity() < 1)
+		if(txtCapacity.getText().length() < 1)
 		{
 			lblCapacity.setForeground(Color.RED);
+			error += " - Capacity \n";
 			check = false;
 		}else lblCapacity.setForeground(Color.BLACK);
-		if(this.group.getLevel().getId() < 1)
+		if(((Level)cbLevel.getSelectedItem()).getId() < 1)
 		{
 			lblLevel.setForeground(Color.RED);
+			error += " - Level \n";
 			check = false;
 		}else lblLevel.setForeground(Color.BLACK);
-		if(this.group.getTeacher().getId() < 1)
-		{
-			lblTeacher.setForeground(Color.RED);
-			check = false;
-		}else lblTeacher.setForeground(Color.BLACK);
 		
 		if(check)
 		{
+			fillGroup();
 			GroupDAO groupDAO = new GroupDAO(db.connection);
 			groupDAO.updateGroup(this.group, this.schedule_list);
+		}
+		else
+		{
+			JOptionPane.showMessageDialog(this, "Please select: \n" + error);
 		}
 		return check;
 	}
@@ -429,19 +449,20 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	{
 		this.group.setName(txtName.getText());
 		this.group.setCapacity(Integer.parseInt(txtCapacity.getText()));
-		this.group.setTeacher((Teacher)cbTeacher.getSelectedItem());
+		//this.group.setTeacher((Teacher)cbTeacher.getSelectedItem());
+		this.group.setTeacher(lblDispTeacher.getText());
 		this.group.setLevel((Level)cbLevel.getSelectedItem());
 		
-		List<Schedule> newList = new ArrayList<Schedule>();
+		List<Group_schedule> newList = new ArrayList<Group_schedule>();
 		for(int i=0; i < list.getModel().getSize(); i++)
 		{
-			Schedule schedule = (Schedule)((DefaultListModel) list.getModel()).getElementAt(i);
-			newList.add(schedule);
-			if(this.schedule_list.contains(schedule)){
-				this.schedule_list.remove(schedule);
+			Group_schedule gschedule = (Group_schedule)((DefaultListModel) list.getModel()).getElementAt(i);
+			newList.add(gschedule);
+			if(this.schedule_list.contains(gschedule)){
+				this.schedule_list.remove(gschedule);
 			}else{
-				schedule.setStatus(1);
-				this.schedule_list.add(schedule);
+				gschedule.setStatus(1);
+				this.schedule_list.add(gschedule);
 			}
 		}
 
@@ -456,9 +477,43 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	}
 
 	@Override
-	public void returnSchedule(Schedule schedule) {
+	public void returnGroup_schedule(Group_schedule group_schedule) {
 		// TODO Auto-generated method stub
-		((DefaultListModel) list.getModel()).addElement(schedule);
-		System.out.println(schedule.getName());
+		((DefaultListModel) list.getModel()).addElement(group_schedule);
+		lblDispTeacher.setText(getTeacher(getTeacherFromList()));
+		System.out.println(group_schedule.getSchedule().getName());
+	}
+	
+	private List<String> getTeacherFromList()
+	{
+		List<String> teachers_list = new ArrayList<String>();
+		int size = list.getModel().getSize();
+			for(int i=0; i < size; i++)
+			{
+				String teacher_name = ((Group_schedule)list.getModel().getElementAt(i)).getTeacher().getName();
+				if(!teachers_list.contains(teacher_name))
+				{
+					teachers_list.add(teacher_name);
+				}
+			}
+			//this.teacher_list = teachers_list;
+		return teachers_list;
+	}
+	
+	private String getTeacher(List<String> teachers)
+	{
+		String s = "";
+		for(String t : teachers){
+			s += t + ", ";
+		}
+		if(s.length() > 0)
+		{
+			s = s.substring(0, s.length()-2);
+		}
+		else
+		{
+			s = "None";
+		}
+		return s;
 	}
 }

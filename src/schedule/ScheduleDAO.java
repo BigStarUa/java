@@ -25,6 +25,7 @@ public class ScheduleDAO {
 		schedule.setName(rs.getString("name"));
 		schedule.setWeekDay(rs.getString("week_day"));	
 		schedule.setStatus(Schedule.STATUS_OLD);	
+		schedule.setTime(rs.getString("time"));
 		return schedule;
 	}
 	
@@ -96,15 +97,16 @@ public class ScheduleDAO {
 		try {
 			if(schedule.getId() > 0)
 			{
-				ps = con.prepareStatement("UPDATE schedule SET name=?, week_day=? WHERE id=?");
-				ps.setInt(3, schedule.getId());
+				ps = con.prepareStatement("UPDATE schedule SET name=?, week_day=?, time=? WHERE id=?");
+				ps.setInt(4, schedule.getId());
 			}
 			else
 			{
-				ps = con.prepareStatement("INSERT INTO schedule (name, week_day) VALUES (?, ?)");
+				ps = con.prepareStatement("INSERT INTO schedule (name, week_day, time) VALUES (?,?,?)");
 			}
 			ps.setString(1, schedule.getName());
 			ps.setString(2, schedule.getWeekDay());
+			ps.setString(3, schedule.getTime());
 			ps.executeUpdate();
 			ps.close();
 			

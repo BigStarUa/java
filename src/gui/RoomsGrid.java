@@ -135,4 +135,10 @@ public class RoomsGrid extends JPanel implements ToolBarInteface{
 		return this.toolBar;
 	}
 
+	@Override
+	public void pushToolbar(JToolBar toolBar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

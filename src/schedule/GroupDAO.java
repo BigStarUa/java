@@ -23,7 +23,7 @@ public class GroupDAO {
 		group.setLevel(getLevel(rs.getInt("level")));
 		group.setCapacity(rs.getInt("capacity"));
 		group.setStudentAge(rs.getInt("stud_age"));
-		group.setTeacher(getTeacher(rs.getInt("teacher")));
+		group.setTeacher(rs.getString("teacher"));
 		group.setSchedule(getScheduleListFromGroup(rs.getInt("id")));
 		group.setValue(rs.getInt("value"));
 		return group;
@@ -44,27 +44,34 @@ public class GroupDAO {
 		return teacher;
 	}
 	
-	private List<Schedule> getScheduleListFromGroup(int id)
+	private List<Group_schedule> getScheduleListFromGroup(int group_id)
 	{
-		List<Schedule> list = new ArrayList<Schedule>();
-		ScheduleDAO scheduleDAO = new ScheduleDAO(con);
-		
-		try {
-			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM group_schedule WHERE group_id=" + id );
-			while(rs.next())
-			{
-				Schedule schedule = scheduleDAO.getSchedule(rs.getInt("schedule_id"));
-				list.add(schedule);				
-			}
-			rs.close();
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return list;	
+		Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(con);
+		List<Group_schedule> group_schedule = group_scheduleDAO.getGroup_scheduleList(group_id);
+		return group_schedule;
 	}
+	
+//	private List<Schedule> getScheduleListFromGroup(int id)
+//	{
+//		List<Schedule> list = new ArrayList<Schedule>();
+//		ScheduleDAO scheduleDAO = new ScheduleDAO(con);
+//		
+//		try {
+//			ResultSet rs = con.createStatement().executeQuery( "SELECT * FROM group_schedule WHERE group_id=" + id );
+//			while(rs.next())
+//			{
+//				Schedule schedule = scheduleDAO.getSchedule(rs.getInt("schedule_id"));
+//				list.add(schedule);				
+//			}
+//			rs.close();
+//			
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		return list;	
+//	}
 	
 	public Group getGroup(int id)
 	{
@@ -111,7 +118,7 @@ public class GroupDAO {
 	}
 	
 
-	public void updateGroup(Group group, List<Schedule> list)
+	public void updateGroup(Group group, List<Group_schedule> list)
 	{
 		try
 	    {
@@ -130,34 +137,47 @@ public class GroupDAO {
 		    ps.setInt( 2, group.getLevel().getId() );
 		    ps.setInt( 3, group.getCapacity() );
 		    ps.setInt( 4, group.getStudentAge() );
-		    ps.setInt( 5, group.getTeacher().getId() );
+		    ps.setString( 5, group.getTeacher() );
 		    //ps.setInt( 6, group.getSchedule() );
 		    ps.executeUpdate();
+		    ps.close();
 		    
-		    
-
-		    for(Schedule item : list)
+		    Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(con);
+		    for(Group_schedule item : list)
 		    {
 		    	if(item.getStatus() == Schedule.STATUS_NEW)
 		    	{
-		    		ps = con.prepareStatement( "INSERT INTO group_schedule" +
-		    				" (group_id, schedule_id) VALUES (?,?)" );	
-					ps.setInt( 1, group.getId());
-				    ps.setInt( 2, item.getId() );
-				    ps.executeUpdate();
-		    		
-		    	}else{
-		    		
-		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE" +
-		    				" group_id=? AND schedule_id=?" );
-		    		ps.setInt( 1, group.getId());
-				    ps.setInt( 2, item.getId() );
-		  	    	ps.executeUpdate();
+		    		group_scheduleDAO.updateGroup_schedule(item);
 		    	}
-		    	
+		    	else
+		    	{
+		    		group_scheduleDAO.deleteGroup_schedule(item.getId());
+		    	}
 		    }
 		    
-		    ps.close();
+
+//		    for(Group_schedule item : list)
+//		    {
+//		    	if(item.getStatus() == Schedule.STATUS_NEW)
+//		    	{
+//		    		ps = con.prepareStatement( "INSERT INTO group_schedule" +
+//		    				" (group_id, schedule_id) VALUES (?,?)" );	
+//					ps.setInt( 1, group.getId());
+//				    ps.setInt( 2, item.getId() );
+//				    ps.executeUpdate();
+//		    		
+//		    	}else{
+//		    		
+//		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE" +
+//		    				" group_id=? AND schedule_id=?" );
+//		    		ps.setInt( 1, group.getId());
+//				    ps.setInt( 2, item.getId() );
+//		  	    	ps.executeUpdate();
+//		    	}
+//		    	
+//		    }
+		    
+		    
 	    }
 		catch( SQLException e )
 	    { 

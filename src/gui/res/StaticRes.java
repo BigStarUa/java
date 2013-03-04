@@ -24,6 +24,8 @@ public class StaticRes {
 	public static final Icon ADD16_ICON = new ImageIcon(StaticRes.class.getResource("icon/add16.png"));
 	public static final Icon DELETE16_ICON = new ImageIcon(StaticRes.class.getResource("icon/delete16.png"));
 	
+	public static final Icon EDIT32_ICON = new ImageIcon(StaticRes.class.getResource("icon/edit32.png"));
+	
 	public static final Icon SCHEDULE48_ICON = new ImageIcon(StaticRes.class.getResource("icon/schedule48.png"));
 	public static final Icon TEACHER48_ICON = new ImageIcon(StaticRes.class.getResource("icon/teacher48.png"));
 	public static final Icon CLASS48_ICON = new ImageIcon(StaticRes.class.getResource("icon/class48.png"));

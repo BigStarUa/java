@@ -12,6 +12,7 @@ public class Schedule implements ComboBoxInterface{
 	String name;	
 	String week_day;
 	int status;
+	String time;
 	
 	public Schedule() {
 
@@ -36,6 +37,11 @@ public class Schedule implements ComboBoxInterface{
 	{
 		this.status = status;
 	}
+	
+	public void setTime(String time)
+	{
+		this.time = time;
+	}
 
 	public int getId()
 	{
@@ -55,5 +61,10 @@ public class Schedule implements ComboBoxInterface{
 	public int getStatus()
 	{
 		return this.status;
+	}
+	
+	public String getTime()
+	{
+		return this.time;
 	}
 }

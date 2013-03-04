@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,6 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import schedule.DbHelper;
+import schedule.Group_schedule;
 import schedule.Room;
 import schedule.Schedule;
 import schedule.ScheduleDAO;
@@ -49,6 +51,8 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private JTabbedPane tabbedPane;
 	private JTable table;
 	private ScheduleResultListener listener;
+	private JComboBox cbTeacher;
+	private Group_schedule group_schedule = null;
 
 	public ScheduleSelectDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -59,10 +63,12 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	 * Create the dialog.
 	 * @throws ClassNotFoundException 
 	 */
-	public ScheduleSelectDialog(Window owner, String title, ModalityType modalityType, ScheduleResultListener listener) throws ClassNotFoundException {
+	public ScheduleSelectDialog(Window owner, String title, ModalityType modalityType,
+			ScheduleResultListener listener, Group_schedule group_schedule) throws ClassNotFoundException {
 		super(owner, title, modalityType);
 		db = new DbHelper();
 		this.listener = listener;
+		this.group_schedule = group_schedule;
 		//populateForm();
 		initContent();
 		addContent();
@@ -96,8 +102,8 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			        int row = ((JTable) evt.getSource()).rowAtPoint(evt.getPoint());;
 			        if (row >= 0 ) {
 			        	Schedule schedule = (Schedule)((JTable) evt.getSource()).getValueAt(row, -1);
-			        	ScheduleSelectDialog.this.dispose();
-			        	listener.returnSchedule(schedule);
+			        	Teacher teacher = (Teacher)cbTeacher.getSelectedItem();
+			        	submit(schedule, teacher);
 			        }
 		    	 }
 		    }
@@ -116,6 +122,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
+
 		
 		contentPanel.add(tabbedPane, BorderLayout.CENTER);
 		
@@ -140,7 +147,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		lblTeacher.setBorder(new EmptyBorder(0, 40, 0, 0));
 		panel_1.add(lblTeacher);
 		
-		JComboBox cbTeacher = new JComboBox();
+		cbTeacher = new JComboBox();
 		cbTeacher.setPreferredSize(new Dimension(150, 20));
 		cbTeacher.setMinimumSize(new Dimension(100, 20));
 		
@@ -163,6 +170,18 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						System.out.println("OK Clicked!");
+						
+						JScrollPane js = (JScrollPane)tabbedPane.getSelectedComponent();
+						JTable t = (JTable)js.getViewport().getComponent(0);
+						Schedule schedule = null;
+						if(t.getSelectedRow() >= 0){
+							schedule = (Schedule)t.getValueAt(t.getSelectedRow(), -1);
+						}
+						
+						Teacher teacher = (Teacher)cbTeacher.getSelectedItem();
+						
+						submit(schedule, teacher);
+						
 						//fillGroup();
 						//if(saveGroup())
 						//{
@@ -231,6 +250,30 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			    }
 		};
 		return renderer;
+	}
+	
+	private void submit(Schedule schedule, Teacher teacher)
+	{
+		String error = "";
+		if(schedule == null)
+		{
+			error += " - schedule \n";
+		}
+		if(teacher.getId() <= 0)
+		{
+			error += " - teacher \n";
+		}
+		if(schedule != null && teacher.getId() > 0){
+			//Component c = tabbedPane.getSelectedComponent();
+			this.group_schedule.setSchedule(schedule);
+			this.group_schedule.setTeacher(teacher);
+			ScheduleSelectDialog.this.dispose();
+	    	listener.returnGroup_schedule(this.group_schedule);
+		}
+		else
+		{
+			JOptionPane.showMessageDialog(this, "Please select: \n" + error);
+		}
 	}
 	
 	@Override

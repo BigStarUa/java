@@ -77,13 +77,6 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 						Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
 						label.setText(value.toString());
 						label.setBorder(paddingBorder);
-						
-						//label.setBackground(Color.green);
-						
-//					    JTextField editor = new JTextField();
-//					    if (value != null)
-//					      editor.setText(value.toString());
-//					    editor.setBackground((row % 2 == 0) ? Color.white : Color.cyan);
 					    return label;
 					  }
 			}
@@ -95,7 +88,8 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 			table.getColumnModel().getColumn(0).setPreferredWidth(100);
 			table.getColumnModel().getColumn(1).setPreferredWidth(50);
 			table.getColumnModel().getColumn(2).setPreferredWidth(50);
-			table.getColumnModel().getColumn(3).setPreferredWidth(17);
+			table.getColumnModel().getColumn(3).setMaxWidth(70);
+			table.getColumnModel().getColumn(3).setPreferredWidth(55);
 			//table.getColumnModel().getColumn(3).setCellRenderer( centerRenderer );
 			table.setRowHeight(20);
 			table.setDefaultRenderer(Object.class, tableRenderer);
@@ -173,6 +167,12 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 				table.repaint();
 			}
 		}
+		
+	}
+
+	@Override
+	public void pushToolbar(JToolBar toolBar) {
+		// TODO Auto-generated method stub
 		
 	}
 

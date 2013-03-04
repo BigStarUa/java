@@ -58,12 +58,12 @@ public class GroupTableModel extends AbstractTableModel {
 		case 1:
 			return group.getLevel().getName();
 		case 2:
-			return group.getTeacher().getName();
+			return group.getTeacher();
 		case 3:
 			return group.getCapacity();
 		case 4:
 			String scheduleText = "";
-			for(Schedule s : group.getSchedule()){
+			for(Group_schedule s : group.getSchedule()){
 				scheduleText += s.getName() + " | ";
 			}
 			return scheduleText;

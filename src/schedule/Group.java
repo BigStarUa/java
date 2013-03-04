@@ -10,8 +10,9 @@ public class Group implements Comparable<Group>{
 	private int capacity;
 	private int value;
 	private int studentAge;
-	private Teacher teacher;
-	private List<Schedule> schedule;
+	//private Teacher teacher;
+	private String teacher;
+	private List<Group_schedule> group_schedule;
 	private Room room;
 	
 	public Group(String name, int level, int capacity,
@@ -56,14 +57,14 @@ public class Group implements Comparable<Group>{
 		this.studentAge = studentAge;
 	}
 	
-	public void setTeacher(Teacher teacher)
+	public void setTeacher(String teacher)
 	{
 		this.teacher = teacher;
 	}
 	
-	public void setSchedule(List<Schedule> list)
+	public void setSchedule(List<Group_schedule> list)
 	{
-		this.schedule = list;
+		this.group_schedule = list;
 	}
 	
 	public void setValue(int value)
@@ -101,14 +102,14 @@ public class Group implements Comparable<Group>{
 		return this.studentAge;
 	}
 	
-	public Teacher getTeacher()
+	public String getTeacher()
 	{
 		return this.teacher;
 	}
 	
-	public List<Schedule> getSchedule()
+	public List<Group_schedule> getSchedule()
 	{
-		return this.schedule;
+		return this.group_schedule;
 	}
 	
 	public int getValue()
@@ -142,9 +143,9 @@ public class Group implements Comparable<Group>{
 	
 	private void countValue() {
 		
-		int value = this.level.getValue() + (this.capacity*3) + this.studentAge + this.teacher.getValue();
+		//int value = this.level.getValue() + (this.capacity*3) + this.studentAge + this.teacher.getValue();
 		
-		this.value = value;
+		//this.value = value;
 	}
 	
 }

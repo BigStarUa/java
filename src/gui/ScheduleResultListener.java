@@ -1,8 +1,8 @@
 package gui;
 
-import schedule.Schedule;
+import schedule.Group_schedule;
 
 public interface ScheduleResultListener {
 
-	 public void returnSchedule(Schedule schedule);
+	 public void returnGroup_schedule(Group_schedule group_schedule);
 }

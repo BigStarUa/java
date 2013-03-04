@@ -4,7 +4,6 @@ import gui.res.StaticRes;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Insets;
@@ -19,24 +18,17 @@ import javax.swing.event.ChangeListener;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.JToolBar;
 
-import schedule.Group;
 import javax.swing.UIManager;
 import javax.swing.SwingConstants;
 import java.awt.Dimension;
@@ -210,7 +202,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		  return exist;
 	  }
 	  
-	 private void reBuildJToolBar(Component comp)
+	 public void reBuildJToolBar(Component comp)
 	 {
 		 ToolBarInteface tbf = (ToolBarInteface)comp;
 		 toolBar.removeAll();
@@ -288,7 +280,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	if(!checkExistingTab(ScheduleGrid.class.getName()))
             	{
-            		createTabButtonActionPerformed(evt, new ScheduleGrid(), "Schedule", StaticRes.SCHEDULE_ICON);
+            		createTabButtonActionPerformed(evt, new ScheduleGrid(MainFrame.this), "Schedule", StaticRes.SCHEDULE_ICON);
             	}
             }
         });
@@ -354,6 +346,13 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	public JToolBar getToolbar() {
 		// TODO Auto-generated method stub
 		return this.toolBarPanel;
+	}
+
+	@Override
+	public void pushToolbar(JToolBar toolBar) {
+		// TODO Auto-generated method stub
+		this.toolBarPanel = toolBar;
+		reBuildJToolBar(MainFrame.this);
 	}
 
 }
