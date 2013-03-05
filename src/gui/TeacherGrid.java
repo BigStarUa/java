@@ -114,14 +114,14 @@ public class TeacherGrid extends JPanel implements ToolBarInteface, ResultListen
 	
 	private void getDialog(Teacher t)
 	{
-//		RoomDialog rd;
-//		try {
-//			rd = new TeacherDialog((Window)TeacherGrid.this.getRootPane().getParent(),"Edit Teacher", Dialog.ModalityType.DOCUMENT_MODAL, t, this);
-//			rd.setVisible(true);
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		TeacherDialog td;
+		try {
+			td = new TeacherDialog((Window)TeacherGrid.this.getRootPane().getParent(),"Edit Teacher", Dialog.ModalityType.DOCUMENT_MODAL, t, this);
+			td.setVisible(true);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void setToolBar()

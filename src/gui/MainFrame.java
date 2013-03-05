@@ -333,15 +333,11 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		btnNewButton.setFocusPainted( false );
 		btnNewButton.setRolloverEnabled(true);
 		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-//				GroupsDialog gd;
-//				try {
-//					gd = new GroupsDialog(MainFrame.this, "", Dialog.ModalityType.DOCUMENT_MODAL, new Group());
-//					gd.setVisible(true);
-//				} catch (ClassNotFoundException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+			public void actionPerformed(ActionEvent evt) {
+				if(!checkExistingTab(SummaryGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new SummaryGrid(MainFrame.this), "Summary", StaticRes.SCHEDULE_ICON);
+            	}
 				
 			}
 		});

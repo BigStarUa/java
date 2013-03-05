@@ -74,7 +74,7 @@ public class ScheduleDAO {
 	{
 		List<Schedule> list = new ArrayList<Schedule>();
 		try {
-			PreparedStatement ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=?");
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=? ORDER BY time ASC");
 			ps.setString(1, day);
 			
 			ResultSet rs = ps.executeQuery();

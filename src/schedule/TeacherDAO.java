@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,29 +87,38 @@ public class TeacherDAO {
 		return list;
 	}
 	
-	public void updateTeacher(Teacher teacher)
+	public int updateTeacher(Teacher teacher)
 	{
+		int id = 0;
 		PreparedStatement ps;
 		try {
 			if(teacher.getId() > 0)
 			{
-				ps = con.prepareStatement("UPDATE teacher SET name=?, value=? WHERE id=?");
+				ps = con.prepareStatement("UPDATE teacher SET name=?, value=? WHERE id=?", Statement.RETURN_GENERATED_KEYS);
 				ps.setInt(3, teacher.getId());
 			}
 			else
 			{
-				ps = con.prepareStatement("INSERT INTO teacher (name, value) VALUES (?, ?)");
+				ps = con.prepareStatement("INSERT INTO teacher (name, value) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 			}
 			ps.setString(1, teacher.getName());
 			ps.setInt(2, teacher.getValue());
 			ps.executeUpdate();
+			
+			ResultSet generatedKeys = ps.getGeneratedKeys();
+	        if (generatedKeys.next()) {
+	            id = generatedKeys.getInt(1);
+	        } else {
+	            throw new SQLException("Creating user failed, no generated key obtained.");
+	        }
+			
 			ps.close();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return id;
 	}
 	
 	public void deleteTeacher(int id)
