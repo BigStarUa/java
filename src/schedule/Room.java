@@ -5,12 +5,17 @@ import java.util.HashMap;
 
 public class Room implements Comparable<Room>, Comparator<Room>{
 
+	public static final int STATUS_NEW = 1;
+	public static final int STATUS_OLD = 2;
+	public static final int STATUS_DELETE = 3;
+	
 	int id;
 	String name;
 	int value;
 	int capacity;
 	int group_id;
 	Group group = null;
+	int status;
 	//HashMap<K, V> schedule;
 	public Room(String name, int value, int capacity) {
 		this.name = name;
@@ -55,6 +60,11 @@ public class Room implements Comparable<Room>, Comparator<Room>{
 		this.group = g;		
 	}
 	
+	public void setStatus(int status)
+	{
+		this.status = status;
+	}
+	
 	public int getId()
 	{
 		return this.id;
@@ -82,6 +92,11 @@ public class Room implements Comparable<Room>, Comparator<Room>{
 	
 	public Group getGroup() {
 		return this.group;
+	}
+	
+	public int getStatus()
+	{
+		return this.status;
 	}
 
 	@Override

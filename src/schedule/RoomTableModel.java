@@ -60,6 +60,13 @@ public class RoomTableModel extends AbstractTableModel {
 		return "";
 	}
 	
+	public void addObject(Room room)
+	{
+		roomList.add(room);
+		int size = roomList.size();  
+	    this.fireTableRowsInserted(size-1, size-1);
+	}
+	
 	public Room getObjectAt(int rowIndex)
 	{
 		Room room = roomList.get(rowIndex);
@@ -83,6 +90,12 @@ public class RoomTableModel extends AbstractTableModel {
 		Room room = (Room)value;
 		roomList.set(rowIndex, room);
 		
+	}
+	
+	public void removeObjectAt(int rowIndex)
+	{
+		roomList.remove(rowIndex);
+		this.fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
 }

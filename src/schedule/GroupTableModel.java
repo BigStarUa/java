@@ -98,5 +98,11 @@ public class GroupTableModel extends AbstractTableModel {
 		groupList.set(rowIndex, group);
 		
 	}
+	
+	public void removeObjectAt(int rowIndex)
+	{
+		groupList.remove(rowIndex);
+		this.fireTableRowsDeleted(rowIndex, rowIndex);
+	}
 
 }

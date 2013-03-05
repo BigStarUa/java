@@ -13,7 +13,6 @@ public class StaticRes {
 	public static final Icon CLOSE_TAB_ICON = new ImageIcon(StaticRes.class.getResource("icon/closeTabButton.png"));
 	public static final Icon CLOSE_TAB_ICON_HOVER = new ImageIcon(StaticRes.class.getResource("icon/closeTabButtonHover.png"));
 	public static final Icon PAGE_ICON = new ImageIcon(StaticRes.class.getResource("icon/1361500543_page_edit.png"));
-	public static final Icon ADD_ICON = new ImageIcon(StaticRes.class.getResource("icon/add.png"));
 	public static final Icon OK_ICON = new ImageIcon(StaticRes.class.getResource("icon/ok.png"));
 	public static final Icon CANCEL_ICON = new ImageIcon(StaticRes.class.getResource("icon/cancel.png"));
 	public static final Icon GROUP_ICON = new ImageIcon(StaticRes.class.getResource("icon/group.png"));
@@ -24,7 +23,9 @@ public class StaticRes {
 	public static final Icon ADD16_ICON = new ImageIcon(StaticRes.class.getResource("icon/add16.png"));
 	public static final Icon DELETE16_ICON = new ImageIcon(StaticRes.class.getResource("icon/delete16.png"));
 	
+	public static final Icon ADD32_ICON = new ImageIcon(StaticRes.class.getResource("icon/add32.png"));
 	public static final Icon EDIT32_ICON = new ImageIcon(StaticRes.class.getResource("icon/edit32.png"));
+	public static final Icon DELETE32_ICON = new ImageIcon(StaticRes.class.getResource("icon/delete32.png"));
 	
 	public static final Icon SCHEDULE48_ICON = new ImageIcon(StaticRes.class.getResource("icon/schedule48.png"));
 	public static final Icon TEACHER48_ICON = new ImageIcon(StaticRes.class.getResource("icon/teacher48.png"));

@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,9 +92,10 @@ public class ScheduleDAO {
 		return list;
 	}
 	
-	public void updateSchedule(Schedule schedule)
+	public int updateSchedule(Schedule schedule)
 	{
 		PreparedStatement ps;
+		int id = 0;
 		try {
 			if(schedule.getId() > 0)
 			{
@@ -102,19 +104,27 @@ public class ScheduleDAO {
 			}
 			else
 			{
-				ps = con.prepareStatement("INSERT INTO schedule (name, week_day, time) VALUES (?,?,?)");
+				ps = con.prepareStatement("INSERT INTO schedule (name, week_day, time) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			}
 			ps.setString(1, schedule.getName());
 			ps.setString(2, schedule.getWeekDay());
 			ps.setString(3, schedule.getTime());
 			ps.executeUpdate();
+			
+			ResultSet generatedKeys = ps.getGeneratedKeys();
+	        if (generatedKeys.next()) {
+	            id = generatedKeys.getInt(1);
+	        } else {
+	            throw new SQLException("Creating user failed, no generated key obtained.");
+	        }
+			
 			ps.close();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return id;
 	}
 	
 	public void deleteSchedule(int id)

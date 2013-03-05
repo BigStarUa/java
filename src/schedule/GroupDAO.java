@@ -47,7 +47,7 @@ public class GroupDAO {
 	private List<Group_schedule> getScheduleListFromGroup(int group_id)
 	{
 		Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(con);
-		List<Group_schedule> group_schedule = group_scheduleDAO.getGroup_scheduleList(group_id);
+		List<Group_schedule> group_schedule = group_scheduleDAO.getGroup_scheduleListByGroupId(group_id);
 		return group_schedule;
 	}
 	

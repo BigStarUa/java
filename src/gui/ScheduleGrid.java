@@ -20,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -38,6 +39,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import schedule.DbHelper;
+import schedule.Group;
+import schedule.GroupDAO;
+import schedule.Group_schedule;
+import schedule.Group_scheduleDAO;
 import schedule.ResultListener;
 import schedule.Room;
 import schedule.RoomDAO;
@@ -56,6 +61,8 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 	private JTabbedPane tabbedPane;
 	private JPanel panel;
 	private ToolBarInteface listener;
+	private ScheduleDAO sdao;
+	private JTable tbl;
 
 
 	public ScheduleGrid(ToolBarInteface listener) {
@@ -105,7 +112,7 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 	private void addContent()
 	{
 		
-		ScheduleDAO sdao = new ScheduleDAO(db.connection);
+		sdao = new ScheduleDAO(db.connection);
 		
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
@@ -177,11 +184,11 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 	
 	private void setToolBar()
 	{
-		JTable tbl = getTableByTabIndex(tabbedPane.getSelectedIndex());
+		tbl = getTableByTabIndex(tabbedPane.getSelectedIndex());
 		
 		JToolBar toolBar = new JToolBar();
 		JButton addButton = new JButton();
-		addButton.setIcon(StaticRes.ADD_ICON);
+		addButton.setIcon(StaticRes.ADD32_ICON);
 		addButton.setToolTipText("Add schedule");
 		addButton.setFocusable(false);
 		addButton.addActionListener(new ActionListener() {
@@ -208,6 +215,61 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 			});
 		}
 		toolBar.add(editButton);
+		
+		JButton deleteButton = new JButton();
+		deleteButton.setIcon(StaticRes.DELETE32_ICON);
+		deleteButton.setToolTipText("Delete group");
+		deleteButton.setFocusable(false);
+		deleteButton.setEnabled(false);
+		if(tbl.getSelectedRow() > -1)
+		{
+			deleteButton.setEnabled(true);
+			final Schedule schedule = (Schedule)tbl.getValueAt(tbl.getSelectedRow(), -1);
+			final int index = tbl.getSelectedRow();
+			deleteButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					String message = " Really delete ? ";
+	                String title = "Delete";
+	                int reply = JOptionPane.showConfirmDialog(ScheduleGrid.this.getParent(), message, title, JOptionPane.YES_NO_OPTION);
+	                if (reply == JOptionPane.YES_OPTION)
+	                {
+	                    try
+	                    {
+	                    	Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(db.connection);
+	                    	List<Group_schedule> list = group_scheduleDAO.getGroup_scheduleListByScheduleId(schedule.getId());
+	                    	if(list.size() < 1){
+		                    	sdao.deleteSchedule(schedule.getId());
+		                    	((ScheduleTableModel)tbl.getModel()).removeObjectAt(index);
+			                    tbl.repaint();
+			                    tbl.revalidate();
+			                    tbl.clearSelection();
+			                    setToolBar();
+		                    	listener.pushToolbar(ScheduleGrid.this.toolBar);
+	                    	}
+	                    	else
+	                    	{
+	                    		message = "Schedule: " + schedule.getName() + " still present in group(s):\n";
+	                    		GroupDAO groupDAO = new GroupDAO(db.connection);
+	                    		for(Group_schedule gs : list)
+	                    		{
+	                    			Group group = groupDAO.getGroup(gs.getGroup());
+	                    			message += "Group: " + group.getName() + "\n";
+	                    		}
+	                    		message += "Please delete it from group(s) first";
+	                    		JOptionPane.showMessageDialog(ScheduleGrid.this.getParent(), message);
+	                    	}
+		                    
+	                    }
+	                    catch(NullPointerException e)
+	                    {
+	                    	
+	                    }
+	                    
+	                }
+				}
+			});
+		}
+		toolBar.add(deleteButton);
 		
 		this.toolBar = toolBar;
 		
@@ -256,8 +318,9 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 	public void returnObject(Object o) {
 		// TODO Auto-generated method stub
 		JTable tbl = getTableByTabTitle(((Schedule)o).getWeekDay());
-		if(((Schedule)o).getId() < 1)
+		if(((Schedule)o).getStatus() == Schedule.STATUS_NEW)
 		{
+			((Schedule)o).setStatus(Schedule.STATUS_OLD);
 			((ScheduleTableModel)tbl.getModel()).addObject((Schedule)o);
 			((ScheduleTableModel)tbl.getModel()).fireTableDataChanged();
 		}

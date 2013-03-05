@@ -11,6 +11,7 @@ import java.awt.Window;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
@@ -49,6 +50,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 	private List<Group> groupList;
 	private GroupTableModel model;
 	private ToolBarInteface listener;
+	private GroupDAO groupDAO;
 
 	/**
 	 * Create the panel.
@@ -63,7 +65,7 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 		  
 		try {
 			db = new DbHelper();
-			GroupDAO groupDAO = new GroupDAO(db.connection);
+			groupDAO = new GroupDAO(db.connection);
 			groupList = groupDAO.getGroupList();
 			model = new GroupTableModel(groupList);
 			
@@ -142,19 +144,20 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 	private void setToolBar()
 	{
 		JToolBar toolBar = new JToolBar();
-		JButton btnNewButton = new JButton();
-		btnNewButton.setIcon(StaticRes.ADD_ICON);
-		btnNewButton.setToolTipText("Add Group");
-		btnNewButton.addActionListener(new ActionListener() {
+		JButton addButton = new JButton();
+		addButton.setIcon(StaticRes.ADD32_ICON);
+		addButton.setToolTipText("Add Group");
+		addButton.setFocusable(false);
+		addButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				getDialog(new Group());
 			}
 		});
-		toolBar.add(btnNewButton);
+		toolBar.add(addButton);
 		
 		JButton editButton = new JButton();
 		editButton.setIcon(StaticRes.EDIT32_ICON);
-		editButton.setToolTipText("Edit schedule");
+		editButton.setToolTipText("Edit group");
 		editButton.setFocusable(false);
 		editButton.setEnabled(false);
 		if(table.getSelectedRow() > -1)
@@ -168,6 +171,42 @@ public class GroupsGrid extends JPanel implements ToolBarInteface, ResultListene
 			});
 		}
 		toolBar.add(editButton);
+		
+		JButton deleteButton = new JButton();
+		deleteButton.setIcon(StaticRes.DELETE32_ICON);
+		deleteButton.setToolTipText("Delete group");
+		deleteButton.setFocusable(false);
+		deleteButton.setEnabled(false);
+		if(table.getSelectedRow() > -1)
+		{
+			deleteButton.setEnabled(true);
+			final Group group = (Group)table.getValueAt(table.getSelectedRow(), -1);
+			deleteButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					String message = " Really delete ? ";
+	                String title = "Delete";
+	                int reply = JOptionPane.showConfirmDialog(GroupsGrid.this.getParent(), message, title, JOptionPane.YES_NO_OPTION);
+	                if (reply == JOptionPane.YES_OPTION)
+	                {
+	                    try
+	                    {
+	                    	groupDAO.deleteGroup(group.getId());
+	                    }
+	                    catch(NullPointerException e)
+	                    {
+	                    	
+	                    }
+	                    ((GroupTableModel)table.getModel()).removeObjectAt(table.getSelectedRow());
+	                    table.repaint();
+	                    table.revalidate();
+	                    table.clearSelection();
+	                    setToolBar();
+                    	listener.pushToolbar(GroupsGrid.this.toolBar);
+	                }
+				}
+			});
+		}
+		toolBar.add(deleteButton);
 		
 		this.toolBar = toolBar;
 	}

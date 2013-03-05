@@ -69,12 +69,32 @@ public class Group_scheduleDAO {
 		return gschedule;
 	}
 	
-	public List<Group_schedule> getGroup_scheduleList(int group_id)
+	public List<Group_schedule> getGroup_scheduleListByGroupId(int group_id)
 	{
 		List<Group_schedule> list = new ArrayList<Group_schedule>();
 		try {
 			PreparedStatement ps = con.prepareStatement("SELECT * FROM group_schedule WHERE group_id=?");
 			ps.setInt(1, group_id);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next())
+			{
+				list.add(getGroup_scheduleFromRS(rs));
+			}
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public List<Group_schedule> getGroup_scheduleListByScheduleId(int schedule_id)
+	{
+		List<Group_schedule> list = new ArrayList<Group_schedule>();
+		try {
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM group_schedule WHERE schedule_id=?");
+			ps.setInt(1, schedule_id);
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next())

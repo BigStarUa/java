@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -28,11 +29,14 @@ import schedule.DbHelper;
 import schedule.Group;
 import schedule.GroupDAO;
 import schedule.GroupTableModel;
+import schedule.Group_schedule;
+import schedule.Group_scheduleDAO;
 import schedule.ResultListener;
 import schedule.Room;
 import schedule.RoomDAO;
 import schedule.RoomTableModel;
 import schedule.Schedule;
+import schedule.ScheduleTableModel;
 
 public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener{
 	/**
@@ -44,6 +48,8 @@ public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener
 	private List<Room> rooms;
 	private RoomTableModel model;
 	private ToolBarInteface listener;
+	private DbHelper db;
+	private RoomDAO roomDAO;
 
 	/**
 	 * Create the panel.
@@ -51,15 +57,12 @@ public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener
 	public RoomsGrid(ToolBarInteface listener) {
 
 		setLayout(new  BorderLayout());
-		//Массив названий столбцов
-		  String[] columnNames = {"Name", "Capacity", "Value"};
 		  this.listener = listener;
-		  DbHelper db;
 		  rooms = null;
 		  
 		try {
 			db = new DbHelper();
-			RoomDAO roomDAO = new RoomDAO(db.connection);
+			roomDAO = new RoomDAO(db.connection);
 			rooms = roomDAO.getRoomList();
 			model = new RoomTableModel(rooms);
 			
@@ -130,8 +133,9 @@ public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener
 	{
 		JToolBar toolBar = new JToolBar();
 		JButton addButton = new JButton();
-		addButton.setIcon(StaticRes.ADD_ICON);
+		addButton.setIcon(StaticRes.ADD32_ICON);
 		addButton.setToolTipText("Add room");
+		addButton.setFocusable(false);
 		addButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				getDialog(new Room());
@@ -148,14 +152,51 @@ public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener
 		if(table.getSelectedRow() > -1)
 		{
 			editButton.setEnabled(true);
-			final Room room = (Room)table.getValueAt(table.getSelectedRow(), -1);
 			editButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
+					Room room = (Room)table.getValueAt(table.getSelectedRow(), -1);
 					getDialog(room);
 				}
 			});
 		}
 		toolBar.add(editButton);
+		
+		JButton deleteButton = new JButton();
+		deleteButton.setIcon(StaticRes.DELETE32_ICON);
+		deleteButton.setToolTipText("Delete class");
+		deleteButton.setFocusable(false);
+		deleteButton.setEnabled(false);
+		if(table.getSelectedRow() > -1)
+		{
+			deleteButton.setEnabled(true);
+			deleteButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					String message = " Really delete ? ";
+	                String title = "Delete";
+	                int reply = JOptionPane.showConfirmDialog(RoomsGrid.this.getParent(), message, title, JOptionPane.YES_NO_OPTION);
+	                if (reply == JOptionPane.YES_OPTION)
+	                {
+	                    try
+	                    {
+	                    	Room room = (Room)table.getValueAt(table.getSelectedRow(), -1);
+	                    	roomDAO.deleteRoom(room.getId());
+	                    	((RoomTableModel)table.getModel()).removeObjectAt(table.getSelectedRow());
+	                    	table.repaint();
+	                    	table.revalidate();
+	                    	table.clearSelection();
+	                    	setToolBar();
+	                    	listener.pushToolbar(RoomsGrid.this.toolBar);
+	                    }
+	                    catch(NullPointerException e)
+	                    {
+	                    	
+	                    }
+	                    
+	                }
+				}
+			});
+		}
+		toolBar.add(deleteButton);
 		
 		this.toolBar = toolBar;
 	}
@@ -174,7 +215,14 @@ public class RoomsGrid extends JPanel implements ToolBarInteface, ResultListener
 	@Override
 	public void returnObject(Object o) {
 		// TODO Auto-generated method stub
-		
+		if(((Room)o).getStatus() == Room.STATUS_NEW)
+		{
+			((Room)o).setStatus(Room.STATUS_OLD);
+			((RoomTableModel)table.getModel()).addObject((Room)o);
+			((RoomTableModel)table.getModel()).fireTableDataChanged();
+		}
+		table.repaint();
+		table.revalidate();
 	}
 
 }

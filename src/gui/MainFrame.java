@@ -272,6 +272,14 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		
 		JMenuItem mntmTeachers = new JMenuItem("Teachers");
 		mntmTeachers.setIcon(StaticRes.TEACHER_ICON);
+		mntmTeachers.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(TeacherGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new TeacherGrid(MainFrame.this), "Teachers", StaticRes.TEACHER_ICON);
+            	}
+            }
+        });
 		mnGridview.add(mntmTeachers);
 		
 		JMenuItem mntmSchedule = new JMenuItem("Schedule");
@@ -321,7 +329,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		btnNewButton.setMaximumSize(new Dimension(40, 40));
 		btnNewButton.setBorderPainted(false);
 		btnNewButton.setBorder(null);
-		btnNewButton.setIcon(StaticRes.ADD_ICON);
+		btnNewButton.setIcon(StaticRes.ADD32_ICON);
 		btnNewButton.setFocusPainted( false );
 		btnNewButton.setRolloverEnabled(true);
 		btnNewButton.addActionListener(new ActionListener() {

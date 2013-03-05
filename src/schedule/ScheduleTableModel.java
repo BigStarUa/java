@@ -63,17 +63,6 @@ public class ScheduleTableModel extends AbstractTableModel {
 		case 1:
 			return schedule.getWeekDay();
 		case 2:
-			
-			/*DateFormat sdf = new SimpleDateFormat("hh:mm");
-			Date date;
-			try {
-				date = sdf.parse(String.format("%04d", 1810));
-				System.out.println("Date and Time: " + date);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} */
-			//System.out.println("Date and Time: " + date);
 			return schedule.getTime();
 		case -1:
 			return schedule;
@@ -89,13 +78,13 @@ public class ScheduleTableModel extends AbstractTableModel {
 	
 	public void addObject(Schedule schedule)
 	{
-		this.scheduleList.add(schedule);
+		scheduleList.add(schedule);
 		int size = scheduleList.size();  
 	    this.fireTableRowsInserted(size-1, size-1);
 	}
 	
 	public void removeRowAt(int row) {
-        this.scheduleList.remove(row);
+        scheduleList.remove(row);
         //this.fireTableDataChanged();
         this.fireTableRowsDeleted(row - 1, scheduleList.size() - 1);
     }
@@ -110,6 +99,12 @@ public class ScheduleTableModel extends AbstractTableModel {
 
 	public void setValueAt(Object value, int rowIndex, int columnIndex) {
 		this.fireTableCellUpdated(rowIndex, columnIndex);
+	}
+	
+	public void removeObjectAt(int rowIndex)
+	{
+		scheduleList.remove(rowIndex);
+		this.fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
 }

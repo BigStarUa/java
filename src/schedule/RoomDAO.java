@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,33 +72,44 @@ public class RoomDAO {
 		return list;
 	}
 	
-	public void updateRoom(Room room)
+	public int updateRoom(Room room)
 	{
+		int id = 0;
+		PreparedStatement ps;
 		try {
-			PreparedStatement ps;
-			
+
 			if(room.getId() > 0) // UPDATE existing room.
 			{
 				ps = con.prepareStatement("UPDATE rooms SET name=?, value=?," +
 						" capacity=?, group_id=? WHERE id=? ");
 				ps.setInt(5, room.getId());
+				id = room.getId();
 			}
 			else // INSERT a new room.
 			{
 				ps = con.prepareStatement("INSERT INTO rooms (name, value," +
-						" capacity, group_id) VALUES (?, ?, ?, ?, ?)");
+						" capacity, group_id) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			}
 			ps.setString(1, room.getName());
 			ps.setInt(2, room.getValue());
 			ps.setInt(3, room.getCapacity());
 			ps.setInt(4, room.getGroupId());
 			ps.executeUpdate();
+			
+			ResultSet generatedKeys = ps.getGeneratedKeys();
+	        if (generatedKeys.next()) {
+	            id = generatedKeys.getInt(1);
+	        } else {
+	            //throw new SQLException("Creating user failed, no generated key obtained.");
+	        }
+	        
 			ps.close();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return id;
 	}
 	
 	public void deleteRoom(int id)

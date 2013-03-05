@@ -65,7 +65,6 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 		this.selected_tab = selected_tab;
 		this.listener = listener;
 		this.schedule = schedule;
-		System.out.println(selected_tab);
 		//populateForm();
 		initContent();
 		fillContent();
@@ -189,12 +188,17 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 	
 	private void fillAndSaveSchedule()
 	{
-		this.schedule.setName(txtName.getText());
-		this.schedule.setTime((String)frmtdtxtfldTime.getValue());
-		this.schedule.setWeekDay(cbWeekDay.getSelectedItem().toString());
+		schedule.setName(txtName.getText());
+		schedule.setTime((String)frmtdtxtfldTime.getValue());
+		schedule.setWeekDay(cbWeekDay.getSelectedItem().toString());
 		
 		ScheduleDAO scheduleDAO = new ScheduleDAO(db.connection);
-		scheduleDAO.updateSchedule(this.schedule);
+		int id = scheduleDAO.updateSchedule(schedule);
+		if(schedule.getId() == 0)
+		{
+			schedule.setId(id);
+			schedule.setStatus(Schedule.STATUS_NEW);
+		}
 	}
 	private DefaultComboBoxModel dayModel(Object[] list)
 	{
