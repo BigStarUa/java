@@ -15,18 +15,6 @@ public class Group implements Comparable<Group>{
 	private List<Group_schedule> group_schedule;
 	private Room room;
 	
-	public Group(String name, int level, int capacity,
-			int studentAge, int teacher, int schedule, int value) {
-		
-		this.name = name;
-		//this.level = level;
-		this.capacity = capacity;
-		this.studentAge = studentAge;
-		//this.teacher = teacher;
-		//this.schedule = schedule;
-		this.value = value;
-		//countValue();
-	}
 
 	public Group() {
 		// TODO Auto-generated constructor stub

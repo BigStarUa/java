@@ -1,6 +1,8 @@
 package schedule;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -8,41 +10,62 @@ public class Main{
 	
 		public static void main(String[] args) throws ClassNotFoundException {
 	
+			class Group_scheduleComparator implements Comparator<Group_schedule> {
+			    public int compare(Group_schedule gs1, Group_schedule gs2) {
+			        return gs2.getRoom().getValue() - gs1.getRoom().getValue();
+			    }
+			}
+			
 			int[] sched = {1,2};
 			
 			DbHelper db = new DbHelper();
+			Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
+			ScheduleDAO sDAO = new ScheduleDAO(db.connection);
+			List<Summary> sumList = new ArrayList<Summary>();
 			
 			for(int schedule : sched)
 			{
-				List<Group> groups = fillRooms(db, schedule);
+				List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule);
+				List<Group_schedule> groups = fillRooms(db, schedule, gs);
+				Collections.sort(groups,new Group_scheduleComparator());
+				Summary s = new Summary();
+				s.setSchedule(sDAO.getSchedule(schedule));
+				s.setGSList(groups);
+				sumList.add(s);
 				System.out.println("Schedule: " + schedule + "-------------");		
-				for(Group g : groups) {
+				for(Group_schedule g : groups) {
 	
 					String teacher = "";
-					if(g.getTeacher() != null)
+					if(g.getGroupObject().getTeacher() != null)
 					{
-						teacher = g.getTeacher();
+						teacher = g.getGroupObject().getTeacher();
 					}
 					
-						System.out.println("Group: " + g.getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
+						System.out.println("Group: " + g.getGroupObject().getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
 		        
 				}
 			}
 			
-	    
+			System.out.println("asd");
 		}
 		
-		private static List<Group> fillRooms(DbHelper db, int schedule)
+		private static List<Group_schedule> fillRooms(DbHelper db, int schedule, List<Group_schedule> gs)
 		{
 			GroupDAO groupDAO = new GroupDAO(db.connection);
 			List<Group> groupList = groupDAO.getGroupList(schedule);
 			Collections.sort(groupList);
 			
+			for(int i = 0; i < gs.size(); i++)
+			{
+				gs.get(i).setGroupObject(groupDAO.getGroup(gs.get(i).getGroup()));
+			}
+			Collections.sort(gs);
+			
 			RoomDAO roomDAO = new RoomDAO(db.connection);
 			List<Room> rooms = roomDAO.getRoomList();
 			Collections.sort(rooms);
 			
-			int count = Math.max(groupList.size(), rooms.size());
+			int count = Math.max(gs.size(), rooms.size());
 			for (int i = 0; i < count; i++)
 			{
 				
@@ -53,14 +76,16 @@ public class Main{
 					virtRoom.setValue(0);
 					rooms.add(virtRoom);
 				}
-				else if(i == groupList.size())
+				else if(i == gs.size())
 				{
 					Group virtGroup = new Group();
 					virtGroup.setCapacity(0);
 					virtGroup.setValue(0);
-					groupList.add(virtGroup);
+					Group_schedule newGS = new Group_schedule();
+					newGS.setGroupObject(virtGroup);
+					gs.add(newGS);
 				}
-				Group g = groupList.get(i);
+				Group_schedule g = gs.get(i);
 				Room r = rooms.get(i);
 				g.setRoom(r);
 			}
@@ -69,28 +94,28 @@ public class Main{
 			while(flag)
 			{
 				flag = false;
-			for (int i = 0; i < groupList.size(); i++)
+			for (int i = 0; i < gs.size(); i++)
 				{
-				Group r = groupList.get(i);
+				Group_schedule r = gs.get(i);
 				if(r.getRoom() == null) continue;
 				
-				for (int n = 0; n < groupList.size(); n++)
+				for (int n = 0; n < gs.size(); n++)
 				{
-					Group g = groupList.get(n);
+					Group_schedule g = gs.get(n);
 					//if(g == null) continue;
 					
 					if(r.getRoom() == null) break;
 					
-					if(r.getValue() < g.getValue()) {
-						if(g.getRoom() == null && r.getRoom().getCapacity() >= g.getCapacity()){
+					if(r.getGroupObject().getValue() < g.getGroupObject().getValue()) {
+						if(g.getRoom() == null && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity()){
 							
 							g.setRoom(r.getRoom());
 							r.setRoom(null);
 							flag = true;
 							
 						}else if(g.getRoom() != null && r.getRoom() != null){
-							if(r.getRoom().getValue() > g.getRoom().getValue() && r.getRoom().getCapacity() >= g.getCapacity() && 
-									g.getRoom().getCapacity() >= r.getCapacity()) 
+							if(r.getRoom().getValue() > g.getRoom().getValue() && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity() && 
+									g.getRoom().getCapacity() >= r.getGroupObject().getCapacity()) 
 							{
 								Room temp = r.getRoom();
 								r.setRoom(g.getRoom());
@@ -109,7 +134,9 @@ public class Main{
 				}
 			}
 			
-			return groupList;
+			return gs;
 		}
+		
+		
 	
 }

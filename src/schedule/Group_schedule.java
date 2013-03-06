@@ -1,14 +1,16 @@
 package schedule;
 
-public class Group_schedule {
+public class Group_schedule implements Comparable<Group_schedule>{
 
 	public static final int STATUS_NEW = 1;
 	public static final int STATUS_OLD = 2;
 	public static final int STATUS_DELETE = 3;
 	int id;
-	int group;	
+	int group;
+	Group groupObject;
 	Schedule schedule;
 	Teacher teacher;
+	Room room;
 	int status;
 	
 	public Group_schedule() {
@@ -37,6 +39,16 @@ public class Group_schedule {
 	public void setStatus(int status)
 	{
 		this.status = status;
+	}
+	
+	public void setGroupObject(Group groupObject)
+	{
+		this.groupObject = groupObject;
+	}
+	
+	public void setRoom(Room room)
+	{
+		this.room = room;
 	}
 
 	public int getId()
@@ -67,5 +79,22 @@ public class Group_schedule {
 	public String getName()
 	{
 		return this.schedule.getName() + " " + this.teacher.getName();
+	}
+	
+	public Group getGroupObject()
+	{
+		return this.groupObject;
+	}
+	
+	public Room getRoom()
+	{
+		return this.room;
+	}
+	
+	@Override
+	public int compareTo(Group_schedule g) {
+		// TODO Auto-generated method stub
+		
+		return g.getGroupObject().getCapacity() - this.getGroupObject().getCapacity();
 	}
 }

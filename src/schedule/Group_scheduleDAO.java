@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Group_scheduleDAO {
+public class Group_scheduleDAO{
 
 	Connection con;
 	
@@ -152,4 +152,5 @@ public class Group_scheduleDAO {
 	       e.printStackTrace(); 
 	     }
 	}
+
 }

@@ -99,7 +99,14 @@ public class GroupDAO {
 	
 	public List<Group> getGroupList(int schedule)
 	{
-		return null;
+		List<Group> list = new ArrayList<Group>();
+		Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(con);
+		List<Group_schedule> group_schedule = group_scheduleDAO.getGroup_scheduleListByScheduleId(schedule);
+		for(Group_schedule gs : group_schedule)
+		{
+			list.add(getGroup(gs.getGroup()));
+		}
+		return list;
 		
 	}
 	

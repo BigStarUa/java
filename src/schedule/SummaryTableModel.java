@@ -102,10 +102,10 @@ public class SummaryTableModel extends AbstractTableModel {
 //		return "";
 	}
 	
-	public Summary getObjectAt(int rowIndex)
+	public Schedule getObjectAt(int rowIndex, int columnIndex)
 	{
 		Summary summary = summaryList.get(rowIndex);
-		return summary;
+		return summary.getScheduleList().get(columnIndex);
 	}
 	
 	public void addObject(Summary summary)

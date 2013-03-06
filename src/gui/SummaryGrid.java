@@ -4,14 +4,22 @@ import gui.res.StaticRes;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Point;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -23,8 +31,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.TreePath;
 
 import schedule.DbHelper;
+import schedule.Group;
+import schedule.GroupDAO;
+import schedule.Group_schedule;
+import schedule.Group_scheduleDAO;
 import schedule.ResultListener;
 import schedule.Room;
 import schedule.RoomDAO;
@@ -74,7 +87,7 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 				summaryList.add(sum);
 			}
 			
-			model = new SummaryTableModel(summaryList, roomsList);
+			model = new SummaryTableModel(getList(), roomsList);
 			
 			TableCellRenderer tableRenderer = (new TableCellRenderer()
 			{
@@ -94,6 +107,7 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 			
 			table = new JTable(model);
 			table.setRowSelectionAllowed(false);
+			table.getTableHeader().setReorderingAllowed(false);
 			table.setDragEnabled(true);  
 			table.setDropMode(DropMode.USE_SELECTION); 
 			table.setTransferHandler(new TS());
@@ -123,6 +137,9 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 //			    	 }
 //			    }
 //			});
+			
+		
+			
 			add(new JScrollPane(table));
 			
 			setToolBar();
@@ -228,4 +245,144 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 		table.repaint();
 		table.revalidate();
 	}
+	
+	
+	class Group_scheduleComparator implements Comparator<Group_schedule> {
+	    public int compare(Group_schedule gs1, Group_schedule gs2) {
+	        return gs2.getRoom().getValue() - gs1.getRoom().getValue();
+	    }
+	}
+	
+	
+	private List<Summary> getList()
+	{
+	
+	int[] sched = {1,2};
+	Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
+	ScheduleDAO sDAO = new ScheduleDAO(db.connection);
+	List<Schedule> scheduleList = new ArrayList<Schedule>();
+	for(String day : StaticRes.WEEK_DAY_LIST)
+	{
+		List<Schedule> sList = scheduleDAO.getScheduleByDayList(day);
+		scheduleList.addAll(sList);
+	}
+	
+	List<Summary> sumList = new ArrayList<Summary>();
+	
+	for(Schedule schedule : scheduleList)
+	{
+		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule.getId());
+		List<Group_schedule> groups = fillRooms(db, schedule.getId(), gs);
+		Collections.sort(groups,new Group_scheduleComparator());
+		Summary s = new Summary();
+		s.setSchedule(schedule);
+		s.setGSList(groups);
+		sumList.add(s);
+		System.out.println("Schedule: " + schedule + "-------------");		
+		for(Group_schedule g : groups) {
+
+			String teacher = "";
+			if(g.getGroupObject().getTeacher() != null)
+			{
+				teacher = g.getGroupObject().getTeacher();
+			}
+			
+				System.out.println("Group: " + g.getGroupObject().getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
+        
+		}
+	}
+	
+	System.out.println("asd");
+	return sumList;
+	}
+
+	private List<Group_schedule> fillRooms(DbHelper db, int schedule, List<Group_schedule> gs)
+	{
+		GroupDAO groupDAO = new GroupDAO(db.connection);
+		List<Group> groupList = groupDAO.getGroupList(schedule);
+		Collections.sort(groupList);
+		
+		for(int i = 0; i < gs.size(); i++)
+		{
+			gs.get(i).setGroupObject(groupDAO.getGroup(gs.get(i).getGroup()));
+		}
+		Collections.sort(gs);
+		
+		RoomDAO roomDAO = new RoomDAO(db.connection);
+		List<Room> rooms = roomDAO.getRoomList();
+		Collections.sort(rooms);
+		
+		int count = Math.max(gs.size(), rooms.size());
+		for (int i = 0; i < count; i++)
+		{
+			
+			if(i == rooms.size())
+			{
+				Room virtRoom = new Room();
+				virtRoom.setCapacity(99);
+				virtRoom.setValue(0);
+				rooms.add(virtRoom);
+			}
+			else if(i == gs.size())
+			{
+				Group virtGroup = new Group();
+				virtGroup.setCapacity(0);
+				virtGroup.setValue(0);
+				Group_schedule newGS = new Group_schedule();
+				newGS.setGroupObject(virtGroup);
+				gs.add(newGS);
+			}
+			Group_schedule g = gs.get(i);
+			Room r = rooms.get(i);
+			g.setRoom(r);
+		}
+		
+		boolean flag = true;
+		while(flag)
+		{
+			flag = false;
+		for (int i = 0; i < gs.size(); i++)
+			{
+			Group_schedule r = gs.get(i);
+			if(r.getRoom() == null) continue;
+			
+			for (int n = 0; n < gs.size(); n++)
+			{
+				Group_schedule g = gs.get(n);
+				//if(g == null) continue;
+				
+				if(r.getRoom() == null) break;
+				
+				if(r.getGroupObject().getValue() < g.getGroupObject().getValue()) {
+					if(g.getRoom() == null && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity()){
+						
+						g.setRoom(r.getRoom());
+						r.setRoom(null);
+						flag = true;
+						
+					}else if(g.getRoom() != null && r.getRoom() != null){
+						if(r.getRoom().getValue() > g.getRoom().getValue() && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity() && 
+								g.getRoom().getCapacity() >= r.getGroupObject().getCapacity()) 
+						{
+							Room temp = r.getRoom();
+							r.setRoom(g.getRoom());
+							g.setRoom(temp);
+							flag = true;
+						}
+						
+					}
+											
+					
+				}
+			
+				
+			}
+			
+			}
+		}
+		
+		return gs;
+	}
+	
+	
 }
