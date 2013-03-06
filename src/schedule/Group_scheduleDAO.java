@@ -23,7 +23,12 @@ public class Group_scheduleDAO{
 		gschedule.setGroup(rs.getInt("group_id"));
 		gschedule.setSchedule(getSchedule(rs.getInt("schedule_id")));	
 		gschedule.setTeacher(getTeacher(rs.getInt("teacher_id")));	
-		gschedule.setStatus(Group_schedule.STATUS_OLD);	
+		gschedule.setStatus(Group_schedule.STATUS_OLD);
+		gschedule.setIsFixed(rs.getBoolean("room_fixed"));
+		if(rs.getBoolean("room_fixed"))
+		{
+			gschedule.setRoom(getRoom(rs.getInt("room_id")));
+		}
 		return gschedule;
 	}
 	
@@ -32,6 +37,13 @@ public class Group_scheduleDAO{
 		GroupDAO groupDAO = new GroupDAO(con);
 		Group group = groupDAO.getGroup(id);
 		return group;
+	}
+	
+	private Room getRoom(int id)
+	{
+		RoomDAO roomDAO = new RoomDAO(con);
+		Room room = roomDAO.getRoom(id);
+		return room;
 	}
 	
 	private Schedule getSchedule(int id)
@@ -117,17 +129,19 @@ public class Group_scheduleDAO{
 			if(gschedule.getId() > 0)
 			{
 				ps = con.prepareStatement("UPDATE group_schedule SET" +
-						" group_id=?, schedule_id=?, teacher_id=? WHERE id=?");
-				ps.setInt(4, gschedule.getId());
+						" group_id=?, schedule_id=?, teacher_id=?, room_id=?, room_fixed=? WHERE id=?");
+				ps.setInt(6, gschedule.getId());
 			}
 			else
 			{
 				ps = con.prepareStatement("INSERT INTO group_schedule" +
-						" (group_id, schedule_id, teacher_id) VALUES (?,?,?)");
+						" (group_id, schedule_id, teacher_id, room_id, room_fixed) VALUES (?,?,?,?,?)");
 			}
 			ps.setInt(1, gschedule.getGroup());
 			ps.setString(2, String.valueOf(gschedule.getSchedule().getId()));
 			ps.setString(3, String.valueOf(gschedule.getTeacher().getId()));
+			ps.setInt(4, gschedule.getRoom().getId());
+			ps.setBoolean(5, gschedule.getIsFixed());
 			ps.executeUpdate();
 			ps.close();
 			

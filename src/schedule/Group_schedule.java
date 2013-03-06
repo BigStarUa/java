@@ -12,6 +12,7 @@ public class Group_schedule implements Comparable<Group_schedule>{
 	Teacher teacher;
 	Room room;
 	int status;
+	boolean isFixed;
 	
 	public Group_schedule() {
 
@@ -50,6 +51,11 @@ public class Group_schedule implements Comparable<Group_schedule>{
 	{
 		this.room = room;
 	}
+	
+	public void setIsFixed(boolean isFixed)
+	{
+		this.isFixed = isFixed;
+	}
 
 	public int getId()
 	{
@@ -78,7 +84,12 @@ public class Group_schedule implements Comparable<Group_schedule>{
 	
 	public String getName()
 	{
-		return this.schedule.getName() + " " + this.teacher.getName();
+		String roomName = "";
+		if(isFixed)
+		{
+			roomName = " " + room.getName(); 
+		}
+		return this.schedule.getName() + "-" + this.teacher.getName() + roomName;
 	}
 	
 	public Group getGroupObject()
@@ -89,6 +100,11 @@ public class Group_schedule implements Comparable<Group_schedule>{
 	public Room getRoom()
 	{
 		return this.room;
+	}
+	
+	public boolean getIsFixed()
+	{
+		return this.isFixed;
 	}
 	
 	@Override

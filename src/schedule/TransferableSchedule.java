@@ -5,10 +5,10 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 
 public class TransferableSchedule implements Transferable {
-	  protected static DataFlavor scheduleFlavor = new DataFlavor(Schedule.class, "A Schedule Object");
+	  protected static DataFlavor scheduleFlavor = new DataFlavor(Group_schedule.class, "A Schedule Object");
 	  protected static DataFlavor[] supportedFlavors = { scheduleFlavor };
-	  Schedule schedule;
-	  public TransferableSchedule(Schedule schedule) {
+	  Group_schedule schedule;
+	  public TransferableSchedule(Group_schedule schedule) {
 	    this.schedule = schedule;
 	  }
 

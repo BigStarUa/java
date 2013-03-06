@@ -222,10 +222,6 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			for(Group_schedule obj : this.schedule_list)
 			{
 				listModel.addElement(obj);
-//				if(!teacher_list.contains(obj.getTeacher().getName()))
-//				{
-//					teacher_list.add(obj.getTeacher().getName());
-//				}
 			}
 			list = new JList(listModel);
 			list.setVisibleRowCount(5);
@@ -332,27 +328,6 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		lblDispTeacher.setBounds(117, 144, 150, 20);
 		contentPanel.add(lblDispTeacher);
 		
-//		TeacherDAO tDAO = new TeacherDAO(db.connection);
-//		cbTeacher = new JComboBox();
-//		if(this.teacher_id < 1)
-//		{
-//			Teacher t = new Teacher();
-//			t.setName("Select teacher");
-//			t.setId(0);
-//			cbTeacher.addItem(t);
-//		}
-//		List<Teacher> teacherList = tDAO.getTeachersList();
-//		for(Teacher teacher : teacherList)
-//		{
-//			cbTeacher.addItem( teacher );
-//			if(teacher.getId() == this.teacher_id)
-//			{
-//				cbTeacher.setSelectedItem( teacher );
-//			}
-//		}
-//		cbTeacher.setRenderer(new ComboBoxRenderer());
-//		cbTeacher.setBounds(117, 146, 150, 20);
-//		contentPanel.add(cbTeacher);
 		{
 			panel = new JPanel();
 			panel.setBorder(UIManager.getBorder("MenuBar.border"));

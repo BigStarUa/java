@@ -16,9 +16,9 @@ import javax.swing.TransferHandler;
 
 public class TS extends TransferHandler{  
   
-	public static DataFlavor FLAVOR = new DataFlavor(Schedule.class,
-            "Schedule");
-	private Schedule sourceSchedule;
+	public static DataFlavor FLAVOR = new DataFlavor(Group_schedule.class,
+            "Group_Schedule");
+	private Group_schedule sourceSchedule;
 	private int sourceIndexColumn;
 	private boolean isImported = false;
 	
@@ -33,7 +33,7 @@ public class TS extends TransferHandler{
     @Override  
     protected Transferable createTransferable(JComponent source) {
     	if(((JTable) source).getSelectedColumn() > 0){
-    	Schedule s = (Schedule) ((SummaryTableModel)((JTable) source).getModel()).getObjectAt(((JTable) source).getSelectedRow(), ((JTable) source).getSelectedColumn()-1);
+    		Group_schedule s = (Group_schedule) ((SummaryTableModel)((JTable) source).getModel()).getObjectAt(((JTable) source).getSelectedRow(), ((JTable) source).getSelectedColumn()-1);
     	sourceIndexColumn = ((JTable) source).getSelectedColumn();
     	
     	return new TransferableSchedule(s);  
@@ -84,9 +84,7 @@ public class TS extends TransferHandler{
 	        JTable jt = (JTable) support.getComponent(); 
 	        JTable.DropLocation dl = (JTable.DropLocation)support.getDropLocation();
 	        sourceSchedule = ((SummaryTableModel)jt.getModel()).getObjectAt(dl.getRow(), dl.getColumn()-1);
-	//        Schedule s = new Schedule();
-	//        	s.setName("Test2");
-	//        	jt.setValueAt(s, jt.getSelectedRow(), jt.getSelectedColumn());  
+
 	        try {  
 	        	
 	            jt.setValueAt(support.getTransferable().getTransferData(FLAVOR), jt.getSelectedRow(), jt.getSelectedColumn());  

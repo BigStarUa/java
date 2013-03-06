@@ -257,7 +257,6 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 	private List<Summary> getList()
 	{
 	
-	int[] sched = {1,2};
 	Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
 	ScheduleDAO sDAO = new ScheduleDAO(db.connection);
 	List<Schedule> scheduleList = new ArrayList<Schedule>();
@@ -278,21 +277,19 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 		s.setSchedule(schedule);
 		s.setGSList(groups);
 		sumList.add(s);
-		System.out.println("Schedule: " + schedule + "-------------");		
-		for(Group_schedule g : groups) {
-
-			String teacher = "";
-			if(g.getGroupObject().getTeacher() != null)
-			{
-				teacher = g.getGroupObject().getTeacher();
-			}
-			
-				System.out.println("Group: " + g.getGroupObject().getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
-        
-		}
+//		System.out.println("Schedule: " + schedule + "-------------");		
+//		for(Group_schedule g : groups) {
+//
+//			String teacher = "";
+//			if(g.getGroupObject().getTeacher() != null)
+//			{
+//				teacher = g.getGroupObject().getTeacher();
+//			}
+//			
+//				System.out.println("Group: " + g.getGroupObject().getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
+//        
+//		}
 	}
-	
-	System.out.println("asd");
 	return sumList;
 	}
 

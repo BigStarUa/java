@@ -33,6 +33,7 @@ import javax.swing.table.TableModel;
 import schedule.DbHelper;
 import schedule.Group_schedule;
 import schedule.Room;
+import schedule.RoomDAO;
 import schedule.Schedule;
 import schedule.ScheduleDAO;
 import schedule.ScheduleTableModel;
@@ -43,6 +44,7 @@ import javax.swing.JTabbedPane;
 import java.awt.Component;
 import javax.swing.JComboBox;
 import java.awt.Dimension;
+import javax.swing.JCheckBox;
 
 public class ScheduleSelectDialog extends JDialog implements ActionListener{
 
@@ -53,6 +55,8 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private ScheduleResultListener listener;
 	private JComboBox cbTeacher;
 	private Group_schedule group_schedule = null;
+	private JCheckBox chckbxFixedRoom;
+	private JComboBox cbRooms;
 
 	public ScheduleSelectDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -154,7 +158,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		TeacherDAO teacherDAO = new TeacherDAO(db.connection);
 		List<Teacher> teachersList = teacherDAO.getTeachersList();
 		
-		cbTeacher.setModel(teacherModel(teachersList.toArray()));
+		cbTeacher.setModel(comboModel(teachersList.toArray(), Teacher.class));
 		cbTeacher.setRenderer(teacherRenderer());
 		cbTeacher.setSelectedIndex(0);
 		panel_1.add(cbTeacher);
@@ -192,6 +196,23 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 						
 					}
 				});
+				
+				JPanel panel_2 = new JPanel();
+				panel_2.setBorder(new EmptyBorder(0, 0, 0, 30));
+				buttonPane.add(panel_2);
+				
+				chckbxFixedRoom = new JCheckBox("fixed room");
+				chckbxFixedRoom.setIconTextGap(2);
+				chckbxFixedRoom.setSelected(group_schedule.getIsFixed());
+				panel_2.add(chckbxFixedRoom);
+				
+				RoomDAO roomDAO = new RoomDAO(db.connection);
+				List<Room> roomsList = roomDAO.getRoomList();
+				
+				cbRooms = new JComboBox(comboModel(roomsList.toArray(), Room.class));
+				cbRooms.setPreferredSize(new Dimension(100, 20));
+				cbRooms.setRenderer(roomRenderer());
+				panel_2.add(cbRooms);
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
@@ -209,16 +230,24 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			}
 		}
 	}
-	private DefaultComboBoxModel teacherModel(Object[] list)
+	private DefaultComboBoxModel comboModel(Object[] list, Class clss)
 	{
 		DefaultComboBoxModel comboModel = new DefaultComboBoxModel(list)
 		{
 			
 		};
-		Teacher t = new Teacher();
-		t.setName("Select teacher");
-		t.setId(0);
-		comboModel.insertElementAt(t, 0);
+		if(clss == Teacher.class){
+			Teacher t = new Teacher();
+			t.setName("Select teacher");
+			t.setId(0);
+			comboModel.insertElementAt(t, 0);
+		}else if(clss == Room.class)
+		{
+			Room r = new Room();
+			r.setName("Select room");
+			r.setId(0);
+			comboModel.insertElementAt(r, 0);
+		}
 		return comboModel;
 	}
 	
@@ -238,14 +267,28 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			            Teacher item = (Teacher)value;
 			            setText( item.getName() );
 			        }
+			        return this;
+			    }
+		};
+		return renderer;
+	}
+	
+	private BasicComboBoxRenderer roomRenderer()
+	{
+		BasicComboBoxRenderer renderer = 
+		new BasicComboBoxRenderer(){
+			public Component getListCellRendererComponent(
+			        JList list, Object value, int index,
+			        boolean isSelected, boolean cellHasFocus)
+			    {
+			        super.getListCellRendererComponent(list, value, index,
+			            isSelected, cellHasFocus);
 
-			        if (index == -1)
+			        if (value != null)
 			        {
-			        	//ComboBoxInterface item = (ComboBoxInterface)value;
-			            //setText( "None" );
+			            Room item = (Room)value;
+			            setText( item.getName() );
 			        }
-
-
 			        return this;
 			    }
 		};
@@ -254,25 +297,37 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	
 	private void submit(Schedule schedule, Teacher teacher)
 	{
-		String error = "";
+		String errorMSG = "";
+		boolean error = false;
 		if(schedule == null)
 		{
-			error += " - schedule \n";
+			errorMSG += " - schedule \n";
 		}
 		if(teacher.getId() <= 0)
 		{
-			error += " - teacher \n";
+			errorMSG += " - teacher \n";
 		}
-		if(schedule != null && teacher.getId() > 0){
+		if(chckbxFixedRoom.isSelected() && ((Room)cbRooms.getSelectedItem()).getId() < 1)
+		{
+			errorMSG += " - room or unset fixed room \n";
+			error = true;
+		}
+		if(schedule != null && teacher.getId() > 0 && !error){
 			//Component c = tabbedPane.getSelectedComponent();
-			this.group_schedule.setSchedule(schedule);
-			this.group_schedule.setTeacher(teacher);
+			group_schedule.setSchedule(schedule);
+			group_schedule.setTeacher(teacher);
+			group_schedule.setIsFixed(chckbxFixedRoom.isSelected());
+			if(chckbxFixedRoom.isSelected())
+			{
+				group_schedule.setRoom((Room)cbRooms.getSelectedItem());
+			}
+			
 			ScheduleSelectDialog.this.dispose();
-	    	listener.returnGroup_schedule(this.group_schedule);
+	    	listener.returnGroup_schedule(group_schedule);
 		}
 		else
 		{
-			JOptionPane.showMessageDialog(this, "Please select: \n" + error);
+			JOptionPane.showMessageDialog(this, "Please select: \n" + errorMSG);
 		}
 	}
 	

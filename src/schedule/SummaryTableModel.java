@@ -34,11 +34,11 @@ public class SummaryTableModel extends AbstractTableModel {
 		int i = 0;
 		for(Summary sum : summaryList)
 		{
-			for(Schedule sched : sum.getScheduleList())
-			{
+			//for(Group_schedule sched : sum.getGSList())
+			//{
 				i += 1;
-				headersList.add(sched);
-			}
+				headersList.add(sum.getSchedule());
+			//}
 		}
 		
 		return i+1;
@@ -55,16 +55,7 @@ public class SummaryTableModel extends AbstractTableModel {
 
 		}
 		return sum;
-		
-//		switch (columnIndex) {
-//		case 0:
-//			return "Name";
-//		case 1:
-//			return "Week Day";
-//		case 2:
-//			return "Time";
-//		}
-//		return "";
+
 	}
 
 	public int getRowCount() {
@@ -79,9 +70,9 @@ public class SummaryTableModel extends AbstractTableModel {
 		}else{
 		
 		if(rowIndex < summaryList.size()){
-			Summary summary = summaryList.get(rowIndex);
-			if(columnIndex < summary.getScheduleList().size()+1){
-				return summary.getScheduleList().get(columnIndex-1).getName();
+			Summary summary = summaryList.get(columnIndex-1);
+			if(rowIndex < summary.getGSList().size()+1){
+				return summary.getGSList().get(rowIndex).getGroupObject().getName();
 			}else{
 				return "";	
 			}
@@ -89,23 +80,13 @@ public class SummaryTableModel extends AbstractTableModel {
 			return "";
 		}
 		}
-//		switch (columnIndex) {
-//		case 0:
-//			return roomsList.get(rowIndex).getName();
-//		case 1:
-//			return summary.getWeekDay();
-//		case 2:
-//			return "Testt";
-//		case -1:
-//			return summary;
-//		}
-//		return "";
+
 	}
 	
-	public Schedule getObjectAt(int rowIndex, int columnIndex)
+	public Group_schedule getObjectAt(int rowIndex, int columnIndex)
 	{
-		Summary summary = summaryList.get(rowIndex);
-		return summary.getScheduleList().get(columnIndex);
+		Summary summary = summaryList.get(columnIndex);
+		return summary.getGSList().get(rowIndex);
 	}
 	
 	public void addObject(Summary summary)
@@ -130,23 +111,23 @@ public class SummaryTableModel extends AbstractTableModel {
 	}
 
 	public void setValueAt(Object value, int rowIndex, int columnIndex) {
-		
-		
+
 		if(columnIndex == 0)
 		{
-			//return roomsList.get(rowIndex).getName();
-		}else{
-		
-		if(rowIndex < summaryList.size()){
-			Summary summary = summaryList.get(rowIndex);
-			if(columnIndex < summary.getScheduleList().size()+1){
-				summary.getScheduleList().set(columnIndex-1,(Schedule)value);
-			}else{
-				//return "";	
-			}
-		}else{
-			//return "";
+			
 		}
+		else
+		{
+			if(columnIndex-1 < summaryList.size()){
+				Summary summary = summaryList.get(columnIndex-1);
+				if(rowIndex < summary.getGSList().size()){
+					summary.getGSList().set(rowIndex,(Group_schedule)value);
+				}else{
+					//return "";	
+				}
+			}else{
+				//return "";
+			}
 		}
 		this.fireTableCellUpdated(rowIndex, columnIndex);
 	}
