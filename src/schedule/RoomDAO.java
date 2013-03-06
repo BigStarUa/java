@@ -72,6 +72,26 @@ public class RoomDAO {
 		return list;
 	}
 	
+	public List<Room> getNotFixedRoomList(int schedule_id)
+	{
+		List<Room> list = new ArrayList<Room>();
+		try {
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM rooms WHERE id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)");
+			ps.setInt(1, schedule_id);
+			ResultSet rs = ps.executeQuery();
+			while( rs.next() )
+			{
+				list.add(getRoomFromRS(rs));
+			}
+			ps.close();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
 	public int updateRoom(Room room)
 	{
 		int id = 0;

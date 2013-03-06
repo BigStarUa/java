@@ -10,8 +10,11 @@ import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractButton;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -26,12 +29,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import schedule.DbHelper;
 import schedule.Group_schedule;
+import schedule.Group_scheduleDAO;
 import schedule.Room;
 import schedule.RoomDAO;
 import schedule.Schedule;
@@ -57,6 +63,8 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private Group_schedule group_schedule = null;
 	private JCheckBox chckbxFixedRoom;
 	private JComboBox cbRooms;
+	private ScheduleDAO sdao;
+	private Group_scheduleDAO gsDAO;
 
 	public ScheduleSelectDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -81,7 +89,29 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private void addContent()
 	{
 		
-		ScheduleDAO sdao = new ScheduleDAO(db.connection);
+		
+		ChangeListener changeListener = new ChangeListener() {
+		      public void stateChanged(ChangeEvent changeEvent) {
+		        JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
+		        int index = sourceTabbedPane.getSelectedIndex();
+		        
+		        
+		        JScrollPane js = (JScrollPane)sourceTabbedPane.getSelectedComponent();
+				JTable t = (JTable)js.getViewport().getComponent(0);
+				int i = t.getSelectedRow();
+		       if(t.getSelectedRow() >= 0)
+		       {
+		    	   Schedule schedule = (Schedule)t.getValueAt(t.getSelectedRow(), -1);
+		    	   cbRooms.setModel(comboModel(updateRoomModel(schedule.getId()).toArray(), Room.class));
+		       }else{
+		    	   cbRooms.setModel(comboModel(updateRoomModel(-1).toArray(), Room.class));
+		       }
+		     }
+		};
+		tabbedPane.addChangeListener(changeListener);
+		
+		sdao = new ScheduleDAO(db.connection);
+		gsDAO = new Group_scheduleDAO(db.connection);
 		
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
@@ -109,6 +139,13 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			        	Teacher teacher = (Teacher)cbTeacher.getSelectedItem();
 			        	submit(schedule, teacher);
 			        }
+		    	 }else if(evt.getClickCount() == 1 && evt.getButton() == MouseEvent.BUTTON1)
+		    	 {
+		    		 int row = ((JTable) evt.getSource()).rowAtPoint(evt.getPoint());;
+				        if (row >= 0 ) {
+				        	Schedule schedule = (Schedule)((JTable) evt.getSource()).getValueAt(row, -1);
+				        	cbRooms.setModel(comboModel(updateRoomModel(schedule.getId()).toArray(), Room.class));
+				        }
 		    	 }
 		    }
 		});
@@ -204,14 +241,25 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 				chckbxFixedRoom = new JCheckBox("fixed room");
 				chckbxFixedRoom.setIconTextGap(2);
 				chckbxFixedRoom.setSelected(group_schedule.getIsFixed());
+				chckbxFixedRoom.addActionListener(new ActionListener() {
+				      public void actionPerformed(ActionEvent actionEvent) {
+				          AbstractButton abstractButton = (AbstractButton)actionEvent.getSource();
+				          boolean selected = abstractButton.getModel().isSelected();				     
+				          if(selected){
+				        	  cbRooms.setEnabled(true);
+				          }else{
+				        	  cbRooms.setEnabled(false);
+				          }
+				        }
+				      });
 				panel_2.add(chckbxFixedRoom);
 				
-				RoomDAO roomDAO = new RoomDAO(db.connection);
-				List<Room> roomsList = roomDAO.getRoomList();
 				
-				cbRooms = new JComboBox(comboModel(roomsList.toArray(), Room.class));
+				
+				cbRooms = new JComboBox();
 				cbRooms.setPreferredSize(new Dimension(100, 20));
 				cbRooms.setRenderer(roomRenderer());
+				cbRooms.setEnabled(group_schedule.getIsFixed());
 				panel_2.add(cbRooms);
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
@@ -243,10 +291,10 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			comboModel.insertElementAt(t, 0);
 		}else if(clss == Room.class)
 		{
-			Room r = new Room();
-			r.setName("Select room");
-			r.setId(0);
-			comboModel.insertElementAt(r, 0);
+//			Room r = new Room();
+//			r.setName("Select room");
+//			r.setId(0);
+//			comboModel.insertElementAt(r, 0);
 		}
 		return comboModel;
 	}
@@ -329,6 +377,19 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		{
 			JOptionPane.showMessageDialog(this, "Please select: \n" + errorMSG);
 		}
+	}
+	
+	private List<Room> updateRoomModel(int schedule_id)
+	{
+		List<Room> roomsList;
+		if(schedule_id > 0)
+		{
+			RoomDAO roomDAO = new RoomDAO(db.connection);
+			roomsList = roomDAO.getNotFixedRoomList(schedule_id);
+		}else{
+			roomsList = new ArrayList<Room>();
+		}
+		return roomsList;
 	}
 	
 	@Override
