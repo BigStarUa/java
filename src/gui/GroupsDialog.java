@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,6 +82,8 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private JList list;
 	private ResultListener result;
 	private JLabel lblDispTeacher;
+	private JButton btnEdit;
+	private JButton btnRemove;
 
 	/**
 	 * Launch the application.
@@ -158,35 +161,35 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		
 		lblName = new JLabel("Name:");
 		lblName.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblName.setBounds(21, 22, 86, 20);
+		lblName.setBounds(10, 6, 86, 20);
 		contentPanel.add(lblName);
 		
 		lblLevel = new JLabel("Level:");
 		lblLevel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblLevel.setBounds(21, 51, 86, 20);
+		lblLevel.setBounds(10, 35, 86, 20);
 		contentPanel.add(lblLevel);
 		{
 			lblCapacity = new JLabel("Capacity:");
 			lblCapacity.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblCapacity.setBounds(21, 82, 86, 20);
+			lblCapacity.setBounds(10, 66, 86, 20);
 			contentPanel.add(lblCapacity);
 		}
 		{
 			lblStudentAge = new JLabel("Student Age:");
 			lblStudentAge.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblStudentAge.setBounds(21, 113, 86, 20);
+			lblStudentAge.setBounds(10, 97, 86, 20);
 			contentPanel.add(lblStudentAge);
 		}
 		{
 			lblTeacher = new JLabel("Teacher(s):");
 			lblTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblTeacher.setBounds(21, 144, 86, 20);
+			lblTeacher.setBounds(10, 128, 86, 20);
 			contentPanel.add(lblTeacher);
 		}
 		{
 			panel_1 = new JPanel();
 			panel_1.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Schedule", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-			panel_1.setBounds(277, 6, 155, 158);
+			panel_1.setBounds(246, 6, 186, 158);
 			contentPanel.add(panel_1);
 			panel_1.setLayout(null);
 			
@@ -199,7 +202,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			btnAdd.setMaximumSize(new Dimension(40, 23));
 			btnAdd.setMinimumSize(new Dimension(30, 23));
 			btnAdd.setAlignmentX(Component.CENTER_ALIGNMENT);
-			btnAdd.setBounds(10, 13, 67, 23);
+			btnAdd.setBounds(10, 15, 52, 23);
 			btnAdd.setIcon(StaticRes.ADD16_ICON);
 			btnAdd.addActionListener(new java.awt.event.ActionListener() {
 	            public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -244,11 +247,37 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	                return label;
 				}
 			});
-			list.setBounds(10, 40, 135, 107);
+			list.setBounds(10, 44, 166, 103);
+			list.addMouseListener(new java.awt.event.MouseAdapter() {
+			
+		    @Override
+		    public void mouseClicked(MouseEvent evt) {
+		    	
+		    	 if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1){
+		    		 
+			        int row = ((JList) evt.getSource()).getSelectedIndex();
+			        if (row >= 0 ) {
+			        	Group_schedule group_schedule = (Group_schedule)((JList) evt.getSource()).getSelectedValue();
+			        	try {
+							group_schedule.setGroup(group.getId());
+							ScheduleSelectDialog ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule);
+							ssd.setVisible(true);
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			        }
+		    	 }else if(evt.getButton() == MouseEvent.BUTTON1){
+		    		 btnRemove.setEnabled(true);
+		    		 btnEdit.setEnabled(true);
+		    	 }
+		    }
+		});
+			
 			panel_1.add(list);
 			
-			JButton btnRemove = new JButton("Remove");
-			btnRemove.setBounds(78, 13, 67, 23);
+			btnRemove = new JButton("Del");
+			btnRemove.setBounds(125, 15, 52, 23);
 			btnRemove.setFocusTraversalKeysEnabled(false);
 			btnRemove.setFocusable(false);
 			btnRemove.setFocusPainted(false);
@@ -258,8 +287,9 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			btnRemove.setMinimumSize(new Dimension(30, 23));
 			btnRemove.setAlignmentX(Component.CENTER_ALIGNMENT);
 			btnRemove.setIcon(StaticRes.DELETE16_ICON);
-			btnRemove.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
+			btnRemove.setEnabled(false);
+			btnRemove.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent evt) {
 	            	int index = list.getSelectedIndex();
 	            	Group_schedule gschedule = (Group_schedule)list.getSelectedValue();
 	            	if(index >= 0)
@@ -270,10 +300,37 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	            }
 	        });
 			panel_1.add(btnRemove);
+			
+			btnEdit = new JButton("Edit");
+			btnEdit.setMargin(new Insets(2, 4, 2, 4));
+			btnEdit.setIconTextGap(2);
+			btnEdit.setFocusable(false);
+			btnEdit.setFocusPainted(false);
+			btnEdit.setIcon(StaticRes.EDIT16_ICON);
+			btnEdit.setBounds(67, 15, 52, 23);
+			btnEdit.setEnabled(false);
+			btnEdit.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent evt) {
+	            	int index = list.getSelectedIndex();
+	            	if(index >= 0)
+	            	{
+	            		Group_schedule gschedule = (Group_schedule)list.getSelectedValue();
+						try {
+							ScheduleSelectDialog ssd = new ScheduleSelectDialog((Window)GroupsDialog.this.getRootPane().getParent(), "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, gschedule);
+							ssd.setVisible(true);
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+	            	}
+	            }
+	        });
+			panel_1.add(btnEdit);
 		}
 		
 		txtName = new JTextField();
-		txtName.setBounds(117, 24, 150, 20);
+		txtName.setBounds(106, 8, 130, 20);
 		txtName.setText(this.name);
 		contentPanel.add(txtName);
 		txtName.setColumns(10);
@@ -281,7 +338,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			txtCapacity = new JTextField();
 			txtCapacity.setColumns(10);
 			txtCapacity.setText(String.valueOf(this.capacity));
-			txtCapacity.setBounds(117, 84, 150, 20);
+			txtCapacity.setBounds(106, 68, 130, 20);
 			txtCapacity.addKeyListener(new KeyAdapter()
 			{
 			public void keyTyped(KeyEvent ke)
@@ -314,18 +371,18 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 				}
 			}
 			cbLevel.setRenderer(new ComboBoxRenderer());
-			cbLevel.setBounds(117, 53, 150, 20);
+			cbLevel.setBounds(106, 37, 130, 20);
 			contentPanel.add(cbLevel);
 		
 		
 		
 		cbStudentAge = new JComboBox();
-		cbStudentAge.setBounds(117, 115, 150, 20);
+		cbStudentAge.setBounds(106, 99, 130, 20);
 		contentPanel.add(cbStudentAge);
 		
 		lblDispTeacher = new JLabel(getTeacher(getTeacherFromList()));
 		lblDispTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblDispTeacher.setBounds(117, 144, 150, 20);
+		lblDispTeacher.setBounds(106, 128, 130, 20);
 		contentPanel.add(lblDispTeacher);
 		
 		{

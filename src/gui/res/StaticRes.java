@@ -22,6 +22,7 @@ public class StaticRes {
 	
 	public static final Icon ADD16_ICON = new ImageIcon(StaticRes.class.getResource("icon/add16.png"));
 	public static final Icon DELETE16_ICON = new ImageIcon(StaticRes.class.getResource("icon/delete16.png"));
+	public static final Icon EDIT16_ICON = new ImageIcon(StaticRes.class.getResource("icon/edit16.png"));
 	
 	public static final Icon ADD32_ICON = new ImageIcon(StaticRes.class.getResource("icon/add32.png"));
 	public static final Icon EDIT32_ICON = new ImageIcon(StaticRes.class.getResource("icon/edit32.png"));

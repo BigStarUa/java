@@ -72,11 +72,18 @@ public class RoomDAO {
 		return list;
 	}
 	
-	public List<Room> getNotFixedRoomList(int schedule_id)
+	public List<Room> getNotFixedRoomList(int schedule_id, int roomId)
 	{
 		List<Room> list = new ArrayList<Room>();
+		PreparedStatement ps;
 		try {
-			PreparedStatement ps = con.prepareStatement("SELECT * FROM rooms WHERE id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)");
+			if(roomId > 0)
+			{
+				ps = con.prepareStatement("SELECT * FROM rooms WHERE (id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)) OR (id=?)");
+				ps.setInt(2, roomId);
+			}else{
+				ps = con.prepareStatement("SELECT * FROM rooms WHERE id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)");
+			}
 			ps.setInt(1, schedule_id);
 			ResultSet rs = ps.executeQuery();
 			while( rs.next() )

@@ -70,11 +70,19 @@ public class ScheduleDAO {
 	}
 	
 
-	public List<Schedule> getScheduleByDayList(String day)
+	public List<Schedule> getScheduleByDayList(String day, int group_id, int schedule_id)
 	{
 		List<Schedule> list = new ArrayList<Schedule>();
+		PreparedStatement ps;
 		try {
-			PreparedStatement ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=? ORDER BY time ASC");
+			if(group_id > 0)
+			{
+				ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=? AND (id NOT IN (SELECT schedule_id FROM group_schedule WHERE group_id=? GROUP BY schedule_id) OR (id=?)) ORDER BY time ASC");
+				ps.setInt(2, group_id);
+				ps.setInt(3, schedule_id);
+			}else{
+				ps = con.prepareStatement("SELECT * FROM schedule WHERE week_day=? ORDER BY time ASC");
+			}
 			ps.setString(1, day);
 			
 			ResultSet rs = ps.executeQuery();

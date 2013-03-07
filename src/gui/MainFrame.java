@@ -294,13 +294,35 @@ public class MainFrame extends JFrame implements ToolBarInteface{
         });
 		mnGridview.add(mntmSchedule);
 		
+		JMenu mnReports = new JMenu("Reports");
+		menuBar.add(mnReports);
+		
+		JMenuItem mntmTable = new JMenuItem("Table");
+		mntmTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(SummaryGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new SummaryGrid(MainFrame.this), "Summary", StaticRes.SCHEDULE_ICON);
+            	}
+            }
+        });
+		mnReports.add(mntmTable);
+		
+		JMenuItem mntmShortTable = new JMenuItem("Short table");
+		mntmShortTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(SummaryGridShort.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new SummaryGridShort(MainFrame.this), "Summary (short)", StaticRes.SCHEDULE_ICON);
+            	}
+            }
+        });
+		mnReports.add(mntmShortTable);
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		
-		//JPanel panel = new JPanel();
-		//contentPane.add(panel, BorderLayout.NORTH);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		

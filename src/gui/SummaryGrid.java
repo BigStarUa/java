@@ -51,7 +51,7 @@ import schedule.TS;
 
 import javax.swing.BoxLayout;
 
-public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListener{
+public class SummaryGrid extends JPanel implements ToolBarInteface{
 	/**
 	 * 
 	 */
@@ -80,7 +80,7 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 			List<Room> roomsList = roomDAO.getRoomList();
 			for(String day : StaticRes.WEEK_DAY_LIST)
 			{
-				scheduleList = scheduleDAO.getScheduleByDayList(day);
+				scheduleList = scheduleDAO.getScheduleByDayList(day, 0, 0);
 				Summary sum = new Summary();
 				sum.setScheduleList(scheduleList);
 				sum.setWeekDay(day);
@@ -232,19 +232,6 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void returnObject(Object o) {
-		// TODO Auto-generated method stub
-		if(((Room)o).getStatus() == Room.STATUS_NEW)
-		{
-			((Room)o).setStatus(Room.STATUS_OLD);
-			((RoomTableModel)table.getModel()).addObject((Room)o);
-			((RoomTableModel)table.getModel()).fireTableDataChanged();
-		}
-		table.repaint();
-		table.revalidate();
-	}
 	
 	
 	class Group_scheduleComparator implements Comparator<Group_schedule> {
@@ -262,7 +249,7 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 	List<Schedule> scheduleList = new ArrayList<Schedule>();
 	for(String day : StaticRes.WEEK_DAY_LIST)
 	{
-		List<Schedule> sList = scheduleDAO.getScheduleByDayList(day);
+		List<Schedule> sList = scheduleDAO.getScheduleByDayList(day, 0, 0);
 		scheduleList.addAll(sList);
 	}
 	
@@ -277,18 +264,6 @@ public class SummaryGrid extends JPanel implements ToolBarInteface, ResultListen
 		s.setSchedule(schedule);
 		s.setGSList(groups);
 		sumList.add(s);
-//		System.out.println("Schedule: " + schedule + "-------------");		
-//		for(Group_schedule g : groups) {
-//
-//			String teacher = "";
-//			if(g.getGroupObject().getTeacher() != null)
-//			{
-//				teacher = g.getGroupObject().getTeacher();
-//			}
-//			
-//				System.out.println("Group: " + g.getGroupObject().getName() + " Room: " + g.getRoom().getName() + " Teacher: " + teacher);		
-//        
-//		}
 	}
 	return sumList;
 	}

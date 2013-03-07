@@ -116,7 +116,7 @@ public class ScheduleGrid extends JPanel implements ToolBarInteface, ResultListe
 		
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
-		List<Schedule> list = sdao.getScheduleByDayList(day);
+		List<Schedule> list = sdao.getScheduleByDayList(day, 0, 0);
 				
 		TableModel model = new ScheduleTableModel(list);
 		
