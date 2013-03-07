@@ -72,6 +72,8 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private JComboBox cbRooms;
 	private ScheduleDAO sdao;
 	private Group_scheduleDAO gsDAO;
+	private int group_id = 0;
+	private int schedule_id = 0;
 
 	public ScheduleSelectDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -152,10 +154,14 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		
 		sdao = new ScheduleDAO(db.connection);
 		gsDAO = new Group_scheduleDAO(db.connection);
-		
+		group_id = group_schedule.getGroup();
+		if(group_schedule.getId() > 0 && group_schedule.getSchedule() != null)
+		{
+			schedule_id = group_schedule.getSchedule().getId();
+		}
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
-		List<Schedule> list = sdao.getScheduleByDayList(day, group_schedule.getGroup(), group_schedule.getSchedule().getId());
+		List<Schedule> list = sdao.getScheduleByDayList(day, group_id, schedule_id);
 				
 		TableModel model = new ScheduleTableModel(list);
 		
@@ -223,17 +229,17 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		lblTeacher.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblTeacher.setBorder(new EmptyBorder(0, 40, 0, 0));
 		panel_1.add(lblTeacher);
+
+		TeacherDAO teacherDAO = new TeacherDAO(db.connection);
+		List<Teacher> teachersList = teacherDAO.getTeachersList();
 		
 		cbTeacher = new JComboBox();
 		cbTeacher.setPreferredSize(new Dimension(150, 20));
 		cbTeacher.setMinimumSize(new Dimension(100, 20));
-		
-		TeacherDAO teacherDAO = new TeacherDAO(db.connection);
-		List<Teacher> teachersList = teacherDAO.getTeachersList();
-		
 		cbTeacher.setModel(comboModel(teachersList.toArray(), Teacher.class));
 		cbTeacher.setRenderer(teacherRenderer());
 		cbTeacher.setSelectedIndex(0);
+		cbTeacher.setFocusable(false);
 		panel_1.add(cbTeacher);
 		
 		{
@@ -294,6 +300,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 				cbRooms = new JComboBox();
 				cbRooms.setPreferredSize(new Dimension(100, 20));
 				cbRooms.setRenderer(roomRenderer());
+				cbRooms.setEnabled(false);
 				panel_2.add(cbRooms);
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
@@ -402,8 +409,16 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			if(chckbxFixedRoom.isSelected())
 			{
 				group_schedule.setRoom((Room)cbRooms.getSelectedItem());
+			}else{
+				group_schedule.setRoom(new Room());
 			}
-			
+			if(group_schedule.getId() > 0)
+			{
+				group_schedule.setStatus(Group_schedule.STATUS_CHANGED);
+			}else
+			{
+				group_schedule.setStatus(Group_schedule.STATUS_NEW);
+			}
 			ScheduleSelectDialog.this.dispose();
 	    	listener.returnGroup_schedule(group_schedule);
 		}

@@ -5,6 +5,7 @@ public class Group_schedule implements Comparable<Group_schedule>{
 	public static final int STATUS_NEW = 1;
 	public static final int STATUS_OLD = 2;
 	public static final int STATUS_DELETE = 3;
+	public static final int STATUS_CHANGED = 4;
 	int id;
 	int group;
 	Group groupObject;

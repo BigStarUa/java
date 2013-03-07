@@ -69,6 +69,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private int level_id;
 	private String teacher;
 	private int capacity;
+	private int value;
 	private List<String> teacher_list = new ArrayList<String>();
 	private List<Group_schedule> schedule_list = new ArrayList<Group_schedule>();
 	private JLabel lblName;
@@ -84,6 +85,8 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private JLabel lblDispTeacher;
 	private JButton btnEdit;
 	private JButton btnRemove;
+	private JButton btnAdd;
+	private JTextField txtValue;
 
 	/**
 	 * Launch the application.
@@ -129,7 +132,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			this.teacher = this.group.getTeacher();
 			this.capacity = this.group.getCapacity();
 			this.schedule_list = this.group.getSchedule();
-			
+			this.value = this.group.getValue();
 //			ScheduleDAO sDAO = new ScheduleDAO(db.connection);
 //			for(Integer id : this.group.getSchedule())
 //			{
@@ -153,7 +156,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	 * Create the dialog.
 	 */
 	private void initContent() {
-		setBounds(100, 100, 450, 306);
+		setBounds(100, 100, 450, 310);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -189,11 +192,11 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		{
 			panel_1 = new JPanel();
 			panel_1.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Schedule", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-			panel_1.setBounds(246, 6, 186, 158);
+			panel_1.setBounds(246, 6, 186, 175);
 			contentPanel.add(panel_1);
 			panel_1.setLayout(null);
 			
-			JButton btnAdd = new JButton("Add");
+			btnAdd = new JButton("Add");
 			btnAdd.setFocusTraversalKeysEnabled(false);
 			btnAdd.setFocusable(false);
 			btnAdd.setFocusPainted(false);
@@ -247,7 +250,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	                return label;
 				}
 			});
-			list.setBounds(10, 44, 166, 103);
+			list.setBounds(10, 44, 166, 120);
 			list.addMouseListener(new java.awt.event.MouseAdapter() {
 			
 		    @Override
@@ -385,6 +388,26 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		lblDispTeacher.setBounds(106, 128, 130, 20);
 		contentPanel.add(lblDispTeacher);
 		
+		JLabel lblAddValue = new JLabel("Add value:");
+		lblAddValue.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblAddValue.setBounds(10, 159, 108, 14);
+		contentPanel.add(lblAddValue);
+		
+		txtValue = new JTextField();
+		txtValue.setBounds(106, 158, 130, 20);
+		txtValue.setText(String.valueOf(value));
+		txtValue.addKeyListener(new KeyAdapter()
+		{
+		public void keyTyped(KeyEvent ke)
+		{
+			char c = ke.getKeyChar();
+			if (!Character.isDigit(c))
+			ke.consume(); // prevent event propagation
+		}
+		}); 
+		contentPanel.add(txtValue);
+		txtValue.setColumns(10);
+		
 		{
 			panel = new JPanel();
 			panel.setBorder(UIManager.getBorder("MenuBar.border"));
@@ -484,16 +507,22 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		//this.group.setTeacher((Teacher)cbTeacher.getSelectedItem());
 		this.group.setTeacher(lblDispTeacher.getText());
 		this.group.setLevel((Level)cbLevel.getSelectedItem());
+		if(txtValue.getText().length() > 0){
+			this.group.setValue(Integer.parseInt(txtValue.getText()));
+		}else{
+			this.group.setValue(0);
+		}
+		
 		
 		List<Group_schedule> newList = new ArrayList<Group_schedule>();
 		for(int i=0; i < list.getModel().getSize(); i++)
 		{
 			Group_schedule gschedule = (Group_schedule)((DefaultListModel) list.getModel()).getElementAt(i);
 			newList.add(gschedule);
-			if(this.schedule_list.contains(gschedule)){
+			if(this.schedule_list.contains(gschedule) && gschedule.getStatus() != Group_schedule.STATUS_CHANGED){
 				this.schedule_list.remove(gschedule);
 			}else{
-				gschedule.setStatus(1);
+				gschedule.setStatus(Group_schedule.STATUS_NEW);
 				this.schedule_list.add(gschedule);
 			}
 		}
@@ -511,9 +540,11 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	@Override
 	public void returnGroup_schedule(Group_schedule group_schedule) {
 		// TODO Auto-generated method stub
-		((DefaultListModel) list.getModel()).addElement(group_schedule);
+		if(group_schedule.getStatus() == Group_schedule.STATUS_NEW)
+		{
+			((DefaultListModel) list.getModel()).addElement(group_schedule);
+		}
 		lblDispTeacher.setText(getTeacher(getTeacherFromList()));
-		System.out.println(group_schedule.getSchedule().getName());
 	}
 	
 	private List<String> getTeacherFromList()

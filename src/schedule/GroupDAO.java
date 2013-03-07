@@ -139,26 +139,27 @@ public class GroupDAO {
 			if(group.getId()>0)
 			{
 				ps = con.prepareStatement( "UPDATE groups SET name=?, level=?, capacity=?," +
-						" stud_age=?, teacher=? WHERE id=?" );
-		    	ps.setInt( 6, group.getId() );
+						" stud_age=?, teacher=?, value=? WHERE id=?" );
+		    	ps.setInt( 7, group.getId() );
 				
 			}else{
 				ps = con.prepareStatement( "INSERT INTO groups (name, level, capacity," +
-						" stud_age, teacher) VALUES (?,?,?,?,?)" );	
+						" stud_age, teacher, value) VALUES (?,?,?,?,?,?)" );	
 			}
 			ps.setString( 1, group.getName());
 		    ps.setInt( 2, group.getLevel().getId() );
 		    ps.setInt( 3, group.getCapacity() );
 		    ps.setInt( 4, group.getStudentAge() );
 		    ps.setString( 5, group.getTeacher() );
-		    //ps.setInt( 6, group.getSchedule() );
+		    ps.setInt( 6, group.getValue() );
 		    ps.executeUpdate();
 		    ps.close();
 		    
 		    Group_scheduleDAO group_scheduleDAO = new Group_scheduleDAO(con);
 		    for(Group_schedule item : list)
 		    {
-		    	if(item.getStatus() == Schedule.STATUS_NEW)
+		    	if(item.getStatus() == Group_schedule.STATUS_NEW
+		    			|| item.getStatus() == Group_schedule.STATUS_CHANGED)
 		    	{
 		    		group_scheduleDAO.updateGroup_schedule(item);
 		    	}
@@ -166,30 +167,7 @@ public class GroupDAO {
 		    	{
 		    		group_scheduleDAO.deleteGroup_schedule(item.getId());
 		    	}
-		    }
-		    
-
-//		    for(Group_schedule item : list)
-//		    {
-//		    	if(item.getStatus() == Schedule.STATUS_NEW)
-//		    	{
-//		    		ps = con.prepareStatement( "INSERT INTO group_schedule" +
-//		    				" (group_id, schedule_id) VALUES (?,?)" );	
-//					ps.setInt( 1, group.getId());
-//				    ps.setInt( 2, item.getId() );
-//				    ps.executeUpdate();
-//		    		
-//		    	}else{
-//		    		
-//		    		ps = con.prepareStatement( "DELETE FROM group_schedule WHERE" +
-//		    				" group_id=? AND schedule_id=?" );
-//		    		ps.setInt( 1, group.getId());
-//				    ps.setInt( 2, item.getId() );
-//		  	    	ps.executeUpdate();
-//		    	}
-//		    	
-//		    }
-		    
+		    }	    
 		    
 	    }
 		catch( SQLException e )
