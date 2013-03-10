@@ -141,6 +141,28 @@ public class Group_scheduleDAO{
 		return list;
 	}
 	
+	public boolean isRoomOccupied(int schedule_id, int room_id, int id)
+	{
+		boolean isOccupied = false;
+		try {
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM group_schedule WHERE schedule_id=? AND room_fixed=1 AND room_id=? AND id<>?");
+			ps.setInt(1, schedule_id);
+			ps.setInt(2, room_id);
+			ps.setInt(3, id);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next())
+			{
+				isOccupied = true;
+			}
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isOccupied;	
+	}
+	
 	
 	public void updateGroup_schedule(Group_schedule gschedule)
 	{

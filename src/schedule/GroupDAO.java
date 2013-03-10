@@ -128,8 +128,7 @@ public class GroupDAO {
 		}
 		
 		return list;		
-	}
-	
+	}	
 
 	public void updateGroup(Group group, List<Group_schedule> list)
 	{

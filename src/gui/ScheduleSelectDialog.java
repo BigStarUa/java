@@ -19,6 +19,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -74,6 +75,7 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	private Group_scheduleDAO gsDAO;
 	private int group_id = 0;
 	private int schedule_id = 0;
+	private DefaultListModel listModel;
 
 	public ScheduleSelectDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -85,11 +87,12 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 	 * @throws ClassNotFoundException 
 	 */
 	public ScheduleSelectDialog(Window owner, String title, ModalityType modalityType,
-			ScheduleResultListener listener, Group_schedule group_schedule) throws ClassNotFoundException {
+			ScheduleResultListener listener, Group_schedule group_schedule, DefaultListModel listModel) throws ClassNotFoundException {
 		super(owner, title, modalityType);
 		db = new DbHelper();
 		this.listener = listener;
 		this.group_schedule = group_schedule;
+		this.listModel = listModel;
 		//populateForm();
 		initContent();
 		addContent();
@@ -108,6 +111,41 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 			cbRooms.setEnabled(group_schedule.getIsFixed());
 			cbRooms.setSelectedItem(group_schedule.getRoom());
 			
+			// Set selected row
+			for(int i = 0; i < StaticRes.WEEK_DAY_LIST.size(); i++)
+			{
+				if(tabbedPane.getTitleAt(i) == StaticRes.WEEK_DAY_LIST.get(i))
+				{
+					JScrollPane js = (JScrollPane)tabbedPane.getComponentAt(i);
+					JTable t = (JTable)js.getViewport().getComponent(0);
+					for(int index = 0; index < t.getRowCount(); index++)
+					{
+						
+						Schedule schedule = ((ScheduleTableModel)t.getModel()).getObjectAt(index);
+						if(schedule.getId() == group_schedule.getSchedule().getId())
+						{
+							t.setRowSelectionInterval(index,index);
+							tabbedPane.setSelectedIndex(i);
+							break;
+						}else{
+							for(int n=0; n < listModel.getSize(); n++)
+							{
+								if(schedule.getId() == ((Group_schedule)listModel.getElementAt(n)).getSchedule().getId())
+								{
+									((ScheduleTableModel)t.getModel()).removeObjectAt(index);
+									break;
+								}
+							}	
+						}
+						
+						
+					}
+				}
+			}
+		}
+		else
+		{
+			// Set selected row
 			for(int i = 0; i < StaticRes.WEEK_DAY_LIST.size(); i++)
 			{
 				if(tabbedPane.getTitleAt(i) == StaticRes.WEEK_DAY_LIST.get(i))
@@ -117,12 +155,14 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 					for(int index = 0; index < t.getRowCount(); index++)
 					{
 						Schedule schedule = ((ScheduleTableModel)t.getModel()).getObjectAt(index);
-						if(schedule.getId() == group_schedule.getSchedule().getId())
+						for(int n=0; n < listModel.getSize(); n++)
 						{
-							t.setRowSelectionInterval(index,index);
-							tabbedPane.setSelectedIndex(i);
-							break;
-						}
+							if(schedule.getId() == ((Group_schedule)listModel.getElementAt(n)).getSchedule().getId())
+							{
+								((ScheduleTableModel)t.getModel()).removeObjectAt(index);
+								break;
+							}
+						}	
 					}
 				}
 			}
@@ -161,15 +201,13 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 		}
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
-		List<Schedule> list = sdao.getScheduleByDayList(day, group_id, schedule_id);
+		List<Schedule> list = sdao.getScheduleByDayList(day, 0, 0);
 				
 		TableModel model = new ScheduleTableModel(list);
 		
 		table = new JTable(model);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
-		
-		
+
 		table.getColumnModel().getColumn(0).setPreferredWidth(100);
 		table.getColumnModel().getColumn(1).setPreferredWidth(17);
 		table.setRowHeight(20);
@@ -264,14 +302,6 @@ public class ScheduleSelectDialog extends JDialog implements ActionListener{
 						Teacher teacher = (Teacher)cbTeacher.getSelectedItem();
 						
 						submit(schedule, teacher);
-						
-						//fillGroup();
-						//if(saveGroup())
-						//{
-						//	dispose();
-						//}else{
-						//	
-						//}
 						
 					}
 				});

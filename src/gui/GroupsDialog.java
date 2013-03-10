@@ -35,6 +35,7 @@ import schedule.DbHelper;
 import schedule.Group;
 import schedule.GroupDAO;
 import schedule.Group_schedule;
+import schedule.Group_scheduleDAO;
 import schedule.Level;
 import schedule.LevelDAO;
 import schedule.ResultListener;
@@ -87,6 +88,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	private JButton btnRemove;
 	private JButton btnAdd;
 	private JTextField txtValue;
+	private GroupDAO groupDAO;
 
 	/**
 	 * Launch the application.
@@ -195,34 +197,7 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			panel_1.setBounds(246, 6, 186, 175);
 			contentPanel.add(panel_1);
 			panel_1.setLayout(null);
-			
-			btnAdd = new JButton("Add");
-			btnAdd.setFocusTraversalKeysEnabled(false);
-			btnAdd.setFocusable(false);
-			btnAdd.setFocusPainted(false);
-			btnAdd.setPreferredSize(new Dimension(30, 23));
-			btnAdd.setMargin(new Insets(2, 2, 2, 2));
-			btnAdd.setMaximumSize(new Dimension(40, 23));
-			btnAdd.setMinimumSize(new Dimension(30, 23));
-			btnAdd.setAlignmentX(Component.CENTER_ALIGNMENT);
-			btnAdd.setBounds(10, 15, 52, 23);
-			btnAdd.setIcon(StaticRes.ADD16_ICON);
-			btnAdd.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	            	ScheduleSelectDialog ssd;
-					try {
-						Group_schedule group_schedule = new Group_schedule();
-						group_schedule.setGroup(group.getId());
-						ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule);
-						ssd.setVisible(true);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	            }
-	        });
-			panel_1.add(btnAdd);
-			
+
 			DefaultListModel listModel = new DefaultListModel();
 
 			for(Group_schedule obj : this.schedule_list)
@@ -263,7 +238,8 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			        	Group_schedule group_schedule = (Group_schedule)((JList) evt.getSource()).getSelectedValue();
 			        	try {
 							group_schedule.setGroup(group.getId());
-							ScheduleSelectDialog ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule);
+							DefaultListModel listModel = (DefaultListModel)list.getModel();
+							ScheduleSelectDialog ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule, listModel);
 							ssd.setVisible(true);
 						} catch (ClassNotFoundException e) {
 							// TODO Auto-generated catch block
@@ -278,6 +254,35 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		});
 			
 			panel_1.add(list);
+			
+			btnAdd = new JButton("Add");
+			btnAdd.setFocusTraversalKeysEnabled(false);
+			btnAdd.setFocusable(false);
+			btnAdd.setFocusPainted(false);
+			btnAdd.setPreferredSize(new Dimension(30, 23));
+			btnAdd.setMargin(new Insets(2, 2, 2, 2));
+			btnAdd.setMaximumSize(new Dimension(40, 23));
+			btnAdd.setMinimumSize(new Dimension(30, 23));
+			btnAdd.setAlignmentX(Component.CENTER_ALIGNMENT);
+			btnAdd.setBounds(10, 15, 52, 23);
+			btnAdd.setIcon(StaticRes.ADD16_ICON);
+			btnAdd.addActionListener(new java.awt.event.ActionListener() {
+	            public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	ScheduleSelectDialog ssd;
+					try {
+						Group_schedule group_schedule = new Group_schedule();
+						group_schedule.setGroup(group.getId());
+						DefaultListModel listModel = (DefaultListModel)list.getModel();
+						ssd = new ScheduleSelectDialog(null, "Schedule for " + group.getName(), 
+								ModalityType.DOCUMENT_MODAL, GroupsDialog.this, group_schedule, listModel);
+						ssd.setVisible(true);
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	            }
+	        });
+			panel_1.add(btnAdd);
 			
 			btnRemove = new JButton("Del");
 			btnRemove.setBounds(125, 15, 52, 23);
@@ -318,8 +323,9 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 	            	if(index >= 0)
 	            	{
 	            		Group_schedule gschedule = (Group_schedule)list.getSelectedValue();
+	            		DefaultListModel listModel = (DefaultListModel)list.getModel();
 						try {
-							ScheduleSelectDialog ssd = new ScheduleSelectDialog((Window)GroupsDialog.this.getRootPane().getParent(), "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, gschedule);
+							ScheduleSelectDialog ssd = new ScheduleSelectDialog((Window)GroupsDialog.this.getRootPane().getParent(), "Schedule for " + group.getName(), ModalityType.DOCUMENT_MODAL, GroupsDialog.this, gschedule, listModel);
 							ssd.setVisible(true);
 						} catch (ClassNotFoundException e) {
 							// TODO Auto-generated catch block
@@ -486,11 +492,16 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 			error += " - Level \n";
 			check = false;
 		}else lblLevel.setForeground(Color.BLACK);
-		
+		if(isRoomOccupiedColision() != null)
+		{
+			error += " - Room " + isRoomOccupiedColision().getRoom().getName() + " in (" + isRoomOccupiedColision().getSchedule().getName() + ") has already been occupied \n";
+			check = false;
+		}
 		if(check)
 		{
+			
 			fillGroup();
-			GroupDAO groupDAO = new GroupDAO(db.connection);
+			groupDAO = new GroupDAO(db.connection);
 			groupDAO.updateGroup(this.group, this.schedule_list);
 		}
 		else
@@ -517,18 +528,36 @@ public class GroupsDialog extends JDialog implements ActionListener, ScheduleRes
 		List<Group_schedule> newList = new ArrayList<Group_schedule>();
 		for(int i=0; i < list.getModel().getSize(); i++)
 		{
-			Group_schedule gschedule = (Group_schedule)((DefaultListModel) list.getModel()).getElementAt(i);
+			
+			Group_schedule gschedule = (Group_schedule)((DefaultListModel) list.getModel()).getElementAt(i);		
 			newList.add(gschedule);
 			if(this.schedule_list.contains(gschedule) && gschedule.getStatus() != Group_schedule.STATUS_CHANGED){
 				this.schedule_list.remove(gschedule);
 			}else{
-				gschedule.setStatus(Group_schedule.STATUS_NEW);
+				//gschedule.setStatus(Group_schedule.STATUS_NEW);
 				this.schedule_list.add(gschedule);
 			}
 		}
 
 		
 		this.group.setSchedule(newList);
+	}
+
+	private Group_schedule isRoomOccupiedColision() {
+		// TODO Auto-generated method stub
+		Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
+		for(int i=0; i < list.getModel().getSize(); i++)
+		{
+			Group_schedule gschedule = (Group_schedule)((DefaultListModel) list.getModel()).getElementAt(i);
+			if(gschedule.getIsFixed() && gschedule.getRoom() != null)
+			{
+				if(gsDAO.isRoomOccupied(gschedule.getSchedule().getId(), gschedule.getRoom().getId(), gschedule.getId()))
+				{
+					return gschedule;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
