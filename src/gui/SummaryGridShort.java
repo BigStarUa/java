@@ -1,5 +1,6 @@
 package gui;
 
+import exceptions.CapacityException;
 import gui.SummaryGrid.Group_scheduleComparator;
 import gui.res.StaticRes;
 
@@ -18,6 +19,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -79,7 +81,7 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		scheduleDAO = new ScheduleDAO(db.connection);
 		roomDAO = new RoomDAO(db.connection);
 		List<Room> roomsList = roomDAO.getRoomList();
-		
+		try{
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
 			
@@ -119,6 +121,10 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			//setToolBar();
 		tabbedPane.addTab(day,new JScrollPane(table));
 		}
+		}catch(CapacityException e)
+		{
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
 		
 	}
 	
@@ -137,11 +143,11 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 	
 	class Group_scheduleComparator implements Comparator<Group_schedule> {
 	    public int compare(Group_schedule gs1, Group_schedule gs2) {
-	        return gs2.getRoom().getValue() - gs1.getRoom().getValue();
+	        return gs1.getRoom().getOrder() - gs2.getRoom().getOrder();
 	    }
 	}
 	
-	private List<Summary> getList(String weekDay)
+	private List<Summary> getList(String weekDay) throws CapacityException
 	{
 	
 	Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
@@ -151,18 +157,136 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 	scheduleList.addAll(sList);
 	
 	List<Summary> sumList = new ArrayList<Summary>();
-	
+	try{
 	for(Schedule schedule : scheduleList)
 	{
 		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule.getId());
-		List<Group_schedule> groups = fillRooms(db, schedule.getId(), gs);
+		//List<Group_schedule> groups = fillRooms(db, schedule.getId(), gs);
+		List<Group_schedule> groups = fillRoom(schedule.getId());
 		Collections.sort(groups, new Group_scheduleComparator());
 		Summary s = new Summary();
 		s.setSchedule(schedule);
 		s.setGSList(groups);
 		sumList.add(s);
 	}
+	}catch(CapacityException e)
+	{
+		throw new CapacityException(e.getMessage());
+	}
 	return sumList;
+	}
+	
+	private List<Group_schedule> fillRoom(int schedule_id) throws CapacityException
+	{
+		GroupDAO groupDAO = new GroupDAO(db.connection);
+		Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
+		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule_id);
+
+		for(int i = 0; i < gs.size(); i++)
+		{
+			gs.get(i).setGroupObject(groupDAO.getGroup(gs.get(i).getGroup()));
+		}
+		Collections.sort(gs);
+		
+		RoomDAO roomDAO = new RoomDAO(db.connection);
+		List<Room> rooms = roomDAO.getRoomList();
+		Collections.sort(rooms);
+		
+		int count = Math.max(gs.size(), rooms.size());
+		try{
+		for (int i = 0; i < count; i++)
+		{
+			
+			if(i == rooms.size())
+			{
+				Group_schedule g = gs.get(i);
+//				Room virtRoom = new Room();
+//				virtRoom.setCapacity(99);
+//				virtRoom.setValue(0);
+				//rooms.add(virtRoom);
+				throw new CapacityException("Error: not enough rooms (rooms: " + rooms.size() + ", groups: " + gs.size() + ") in "+ g.getSchedule().getName());
+			}
+			else if(i == gs.size())
+			{
+				Group virtGroup = new Group();
+				virtGroup.setCapacity(0);
+				virtGroup.setValue(0);
+				Group_schedule newGS = new Group_schedule();
+				newGS.setGroupObject(virtGroup);
+				gs.add(newGS);
+			}
+			
+			Group_schedule g = gs.get(i);
+			Room r = rooms.get(i);
+			if(g.getGroupObject().getCapacity() > r.getCapacity()) throw new CapacityException("Error: not enough room capacity in " + g.getSchedule().getName());
+			
+			g.setRoom(r);
+		}
+		}catch(CapacityException e)
+		{
+			throw new CapacityException(e.getMessage());		
+		}
+		boolean flag = true;
+		while(flag)
+		{
+			flag = false;
+		for(int i = 0; i < gs.size(); i++)
+		{
+			Group_schedule r = gs.get(i);
+			
+			for (int n = 0; n < gs.size(); n++)
+			{
+				if(i==n) continue;
+				Group_schedule com = gs.get(n);
+				if(r.getGroupObject().getValue() < com.getGroupObject().getValue() 
+						//&& r.getRoom().getValue() > com.getRoom().getValue()
+						&& r.getRoom().getCapacity() >= com.getGroupObject().getCapacity() 
+						&& com.getRoom().getCapacity() >= r.getGroupObject().getCapacity())
+				{
+					if(r.getRoom().getValue() > com.getRoom().getValue())
+					{
+						Room temp = r.getRoom();
+						r.setRoom(com.getRoom());
+						com.setRoom(temp);
+						flag = true;
+						
+					}else if(r.getRoom().getValue() == com.getRoom().getValue()
+							&& r.getRoom().getCapacity() > com.getRoom().getCapacity()
+							&& r.getGroupObject().getCapacity() < com.getGroupObject().getCapacity())
+					{
+						Room temp = r.getRoom();
+						r.setRoom(com.getRoom());
+						com.setRoom(temp);
+						flag = true;
+					}
+					
+				}else if(r.getGroupObject().getValue() == com.getGroupObject().getValue()
+						&& r.getRoom().getCapacity() >= com.getGroupObject().getCapacity() 
+						&& com.getRoom().getCapacity() >= r.getGroupObject().getCapacity())
+				{
+					if(r.getRoom().getValue() < com.getRoom().getValue()
+							&& r.getGroupObject().getCapacity() > com.getGroupObject().getCapacity())
+					{
+						Room temp = r.getRoom();
+						r.setRoom(com.getRoom());
+						com.setRoom(temp);
+						flag = true;
+						
+					}else if(r.getRoom().getValue() == com.getRoom().getValue()
+							&& r.getRoom().getCapacity() > com.getRoom().getCapacity()
+							&& r.getGroupObject().getCapacity() < com.getGroupObject().getCapacity())
+					{
+						Room temp = r.getRoom();
+						r.setRoom(com.getRoom());
+						com.setRoom(temp);
+						flag = true;
+					}					
+
+				}
+			}
+		}
+		}
+		return gs;
 	}
 	
 	private List<Group_schedule> fillRooms(DbHelper db, int schedule, List<Group_schedule> gs)
@@ -266,23 +390,6 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		});
 		toolBar.add(addButton);
 		
-		JButton editButton = new JButton();
-		editButton.setIcon(StaticRes.EDIT32_ICON);
-		editButton.setToolTipText("Edit schedule");
-		editButton.setFocusable(false);
-		editButton.setEnabled(false);
-
-		if(table.getSelectedRow() > -1)
-		{
-			editButton.setEnabled(true);
-			editButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					Room room = (Room)table.getValueAt(table.getSelectedRow(), -1);
-//					getDialog(room);
-				}
-			});
-		}
-		toolBar.add(editButton);
 		
 		JButton deleteButton = new JButton();
 		deleteButton.setIcon(StaticRes.DELETE32_ICON);

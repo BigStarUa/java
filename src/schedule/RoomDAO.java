@@ -25,7 +25,7 @@ public class RoomDAO {
 		room.setValue(rs.getInt("value"));
 		room.setCapacity(rs.getInt("capacity"));
 		room.setGroupId(rs.getInt("group_id"));
-		
+		room.setOrder(rs.getInt("ordering"));
 		return room;
 		
 	}
@@ -57,7 +57,7 @@ public class RoomDAO {
 	{
 		List<Room> list = new ArrayList<Room>();
 		try {
-			PreparedStatement ps = con.prepareStatement("SELECT * FROM rooms");
+			PreparedStatement ps = con.prepareStatement("SELECT * FROM rooms ORDER BY ordering");
 			ResultSet rs = ps.executeQuery();
 			while( rs.next() )
 			{
@@ -79,10 +79,10 @@ public class RoomDAO {
 		try {
 			if(roomId > 0)
 			{
-				ps = con.prepareStatement("SELECT * FROM rooms WHERE (id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)) OR (id=?)");
+				ps = con.prepareStatement("SELECT * FROM rooms WHERE (id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)) OR (id=?) ORDER BY ordering");
 				ps.setInt(2, roomId);
 			}else{
-				ps = con.prepareStatement("SELECT * FROM rooms WHERE id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id)");
+				ps = con.prepareStatement("SELECT * FROM rooms WHERE id NOT IN (SELECT room_id FROM group_schedule WHERE schedule_id=? AND room_fixed=1 GROUP BY room_id) ORDER BY ordering");
 			}
 			ps.setInt(1, schedule_id);
 			ResultSet rs = ps.executeQuery();
@@ -115,7 +115,7 @@ public class RoomDAO {
 			else // INSERT a new room.
 			{
 				ps = con.prepareStatement("INSERT INTO rooms (name, value," +
-						" capacity, group_id) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+						" capacity, group_id, ordering) VALUES (?, ?, ?, ?, (SELECT MAX(ifnull(ordering,0)) FROM rooms)+1)", Statement.RETURN_GENERATED_KEYS);
 			}
 			ps.setString(1, room.getName());
 			ps.setInt(2, room.getValue());

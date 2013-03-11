@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
@@ -55,8 +56,7 @@ public class TS extends TransferHandler{
     @Override
 	public void exportAsDrag(JComponent comp, InputEvent e, int action) {
 		// TODO Auto-generated method stub
-    	
-		super.exportAsDrag(comp, e, action);
+    	super.exportAsDrag(comp, e, action);
 	}
 
 	@Override  
@@ -66,8 +66,10 @@ public class TS extends TransferHandler{
 		}
 		
 		if (!support.isDataFlavorSupported(FLAVOR)) {
+			
 	        return false;
 	    }
+		
 		
     	JTable.DropLocation dl = (JTable.DropLocation)support.getDropLocation();
     	if(dl.getColumn() != sourceIndexColumn)
@@ -84,7 +86,7 @@ public class TS extends TransferHandler{
 	        JTable jt = (JTable) support.getComponent(); 
 	        JTable.DropLocation dl = (JTable.DropLocation)support.getDropLocation();
 	        sourceSchedule = ((SummaryTableModel)jt.getModel()).getObjectAt(dl.getRow(), dl.getColumn()-1);
-
+	        
 	        try {  
 	        	
 	            jt.setValueAt(support.getTransferable().getTransferData(FLAVOR), jt.getSelectedRow(), jt.getSelectedColumn());  
@@ -100,5 +102,11 @@ public class TS extends TransferHandler{
     	}
     	return false;
     }
+
+	@Override
+	public Icon getVisualRepresentation(Transferable t) {
+		// TODO Auto-generated method stub
+		return super.getVisualRepresentation(t);
+	}
 
 }  
