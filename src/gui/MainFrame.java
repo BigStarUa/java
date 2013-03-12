@@ -37,9 +37,9 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 
 	private JPanel contentPane;
 	
-	private static final Icon CLOSE_TAB_ICON = StaticRes.CLOSE_TAB_ICON;
-	private static final Icon CLOSE_TAB_ICON_HOVER = StaticRes.CLOSE_TAB_ICON_HOVER;
-	private static final Icon PAGE_ICON = StaticRes.PAGE_ICON;
+//	private static final Icon CLOSE_TAB_ICON = StaticRes.CLOSE_TAB_ICON;
+//	private static final Icon CLOSE_TAB_ICON_HOVER = StaticRes.CLOSE_TAB_ICON_HOVER;
+//	private static final Icon PAGE_ICON = StaticRes.PAGE_ICON;
 	private int tabCount = 0;
 	
 	// Variables declaration - do not modify                    
@@ -117,9 +117,9 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 	    btnClose.setOpaque(false);
 	 
 	    // Configure icon and rollover icon for button
-	    btnClose.setRolloverIcon(CLOSE_TAB_ICON_HOVER);
+	    btnClose.setRolloverIcon(StaticRes.CLOSE_TAB_ICON_HOVER);
 	    btnClose.setRolloverEnabled(true);
-	    btnClose.setIcon(CLOSE_TAB_ICON);
+	    btnClose.setIcon(StaticRes.CLOSE_TAB_ICON);
 	 
 	    // Set border null so the button doesn't make the tab too big
 	    btnClose.setBorder(null);
@@ -179,7 +179,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		    System.out.println("Add new tab!");
 		    //tabCount++;   
 		    //JScrollPane scrollPane = new JScrollPane(new GroupsGrid());	    
-		    if(icon == null) icon = PAGE_ICON;
+		    if(icon == null) icon = StaticRes.PAGE_ICON;
 		    addClosableTab(tabbedPane,  newclass, name, icon);
 		    
 		  } 

@@ -5,7 +5,9 @@ import gui.SummaryGrid.Group_scheduleComparator;
 import gui.res.StaticRes;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -24,8 +26,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -76,6 +80,54 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		setToolBar();
 	}
 	
+	class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
+
+		  public MultiLineCellRenderer() {
+		    setLineWrap(true);
+		    setWrapStyleWord(true);
+		    setOpaque(true);
+		  }
+
+		  public Component getTableCellRendererComponent(JTable table, Object value,
+		      boolean isSelected, boolean hasFocus, int row, int column) {
+		    if (isSelected) {
+		      setForeground(table.getSelectionForeground());
+		      setBackground(table.getSelectionBackground());
+		    } else {
+		      setForeground(table.getForeground());
+		      setBackground(table.getBackground());
+		    }
+		    setFont(table.getFont());
+		    if (hasFocus) {
+		      setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+		      if (table.isCellEditable(row, column)) {
+		        setForeground(UIManager.getColor("Table.focusCellForeground"));
+		        setBackground(UIManager.getColor("Table.focusCellBackground"));
+		      }
+		    } else {
+		      setBorder(new EmptyBorder(1, 2, 1, 2));
+		    }
+		    setText((value == null) ? "" : value.toString());
+		    return this;
+		  }
+		}
+	
+	public class TextAreaRenderer extends JTextArea
+    implements TableCellRenderer {
+
+  public TextAreaRenderer() {
+    setLineWrap(true);
+    setWrapStyleWord(true);
+  }
+
+  public Component getTableCellRendererComponent(JTable jTable,
+      Object obj, boolean isSelected, boolean hasFocus, int row,
+      int column) {
+    setText((String)obj);
+    return this;
+  }
+}
+	
 	private void addContent()
 	{		
 		scheduleDAO = new ScheduleDAO(db.connection);
@@ -89,16 +141,81 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			
 			TableCellRenderer tableRenderer = (new TableCellRenderer()
 			{
-				protected DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer();
+				protected DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer()
+				{
+
+				
+					
+				};
 				
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					      boolean hasFocus, int row, int column) {
+
 						JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, value, isSelected,
 							      hasFocus, row, column);
-						Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
-						label.setText(value.toString());
-						label.setBorder(paddingBorder);
-					    return label;
+					
+			
+						JTextArea texzt = new JTextArea()
+						{
+							
+							@Override
+							public boolean isOpaque() {
+								// TODO Auto-generated method stub
+								return false;
+							}
+
+							@Override
+							public void repaint(long arg0, int arg1, int arg2,
+									int arg3, int arg4) {
+								// TODO Auto-generated method stub
+								super.repaint(arg0, arg1, arg2, arg3, arg4);
+							}
+
+							@Override
+							public void repaint(Rectangle arg0) {
+								// TODO Auto-generated method stub
+								super.repaint(arg0);
+							}
+
+							@Override
+							public void revalidate() {
+								// TODO Auto-generated method stub
+								super.revalidate();
+							}
+
+							@Override
+							public void invalidate() {
+								// TODO Auto-generated method stub
+								super.invalidate();
+							}
+
+							@Override
+							public void validate() {
+								// TODO Auto-generated method stub
+								//super.validate();
+							}
+							
+						};
+						
+						Border pBorder = BorderFactory.createCompoundBorder(label.getBorder(), BorderFactory.createEmptyBorder(3,5,3,3));
+						
+						//Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
+						if(value != null)
+						{
+
+							//label.setText(value.toString());
+							//label.setBorder(pBorder);
+							texzt.setText(value.toString());
+
+						}
+						if(hasFocus)
+						{
+							texzt.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+							texzt.setForeground(UIManager.getColor("Table.focusCellForeground"));
+							texzt.setBackground(UIManager.getColor("Table.focusCellBackground"));
+						}
+						
+					    return texzt;
 					  }
 			}
 					);
@@ -110,10 +227,10 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			table.setDropMode(DropMode.USE_SELECTION); 
 			table.setTransferHandler(new TS());
 			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//			table.getColumnModel().getColumn(0).setPreferredWidth(100);
-//			table.getColumnModel().getColumn(1).setPreferredWidth(17);
-			table.setRowHeight(20);
-			//table.setDefaultRenderer(Object.class, tableRenderer);
+			table.getColumnModel().getColumn(0).setPreferredWidth(40);
+			table.getColumnModel().getColumn(0).setCellRenderer(new TextAreaRenderer());
+			table.setRowHeight(40);
+			table.setDefaultRenderer(Object.class, tableRenderer);
 			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));	
 			
 			//add(new JScrollPane(table));

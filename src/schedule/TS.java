@@ -61,6 +61,7 @@ public class TS extends TransferHandler{
 
 	@Override  
     public boolean canImport(TransferSupport support) { 
+		
 		if(!support.isDrop()){
 			return false;
 		}

@@ -26,6 +26,7 @@ import schedule.ScheduleDAO;
 
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.SwingConstants;
 
 public class RoomDialog extends JDialog implements ActionListener{
 

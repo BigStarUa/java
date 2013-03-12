@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JLabel;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
@@ -69,16 +70,27 @@ public class SummaryTableModel extends AbstractTableModel {
 			return roomsList.get(rowIndex).getName();
 		}else{
 		
-		if(rowIndex < summaryList.size()){
+		//if(rowIndex <= summaryList.size()){
 			Summary summary = summaryList.get(columnIndex-1);
-			if(rowIndex < summary.getGSList().size()+1){
-				return summary.getGSList().get(rowIndex).getGroupObject().getName();
-			}else{
-				return "";	
+			//if(rowIndex < summary.getGSList().size()+1){
+			Group_schedule gs = summary.getGSList().get(rowIndex);
+			String teacher = "";
+			String scheduleName = "";
+			if(gs.getTeacher() != null)
+				{
+					teacher = gs.getTeacher().getName();
+				}
+			if(gs.getGroupObject().getName() != null)
+			{
+				scheduleName = gs.getGroupObject().getName();
 			}
-		}else{
-			return "";
-		}
+				return scheduleName + "\n " + teacher;
+			//}else{
+			//	return summary.getGSList().get(rowIndex).getGroupObject().getName();	
+			//}
+		//}else{
+		//	return "";
+		//}
 		}
 
 	}
