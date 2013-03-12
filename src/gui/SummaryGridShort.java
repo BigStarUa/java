@@ -112,20 +112,74 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		  }
 		}
 	
-	public class TextAreaRenderer extends JTextArea
+	public class TableJPanel extends JPanel
+	{
+
+  public TableJPanel() {
+    super();
+  }
+  @Override
+	public boolean isOpaque() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void repaint(long arg0, int arg1, int arg2,
+			int arg3, int arg4) {
+		// TODO Auto-generated method stub
+		super.repaint(arg0, arg1, arg2, arg3, arg4);
+	}
+
+	@Override
+	public void repaint(Rectangle arg0) {
+		// TODO Auto-generated method stub
+		super.repaint(arg0);
+	}
+
+	@Override
+	public void revalidate() {
+		// TODO Auto-generated method stub
+		super.revalidate();
+	}
+
+	@Override
+	public void invalidate() {
+		// TODO Auto-generated method stub
+		super.invalidate();
+	}
+
+	@Override
+	public void validate() {
+		// TODO Auto-generated method stub
+		super.validate();
+	}
+  
+}
+	
+	private static class ValueRenderer extends JTextArea
     implements TableCellRenderer {
 
-  public TextAreaRenderer() {
-    setLineWrap(true);
-    setWrapStyleWord(true);
-  }
+    private static final Color hilite = new Color(0xE8E8E8);
 
-  public Component getTableCellRendererComponent(JTable jTable,
-      Object obj, boolean isSelected, boolean hasFocus, int row,
-      int column) {
-    setText((String)obj);
-    return this;
-  }
+    public ValueRenderer() {
+        this.setOpaque(true);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(
+        JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int col) {
+       // Value v = (Value) value;
+        //this.setSelected(v.selected);
+        this.setText(value.toString());
+        if (isSelected) {
+            this.setBackground(hilite);
+        } else {
+            this.setBackground(Color.white);
+        }
+        return this;
+    }
 }
 	
 	private void addContent()
@@ -197,6 +251,8 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 							
 						};
 						
+						TableJPanel panel = new TableJPanel();
+						
 						Border pBorder = BorderFactory.createCompoundBorder(label.getBorder(), BorderFactory.createEmptyBorder(3,5,3,3));
 						
 						//Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
@@ -214,8 +270,13 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 							texzt.setForeground(UIManager.getColor("Table.focusCellForeground"));
 							texzt.setBackground(UIManager.getColor("Table.focusCellBackground"));
 						}
+						JLabel label1 = new JLabel();
+						label1.setText("Test");
+						//panel.setLayout(new BoxLayout(table, BoxLayout.X_AXIS));
+						panel.add(texzt);
+						panel.add(label1);
 						
-					    return texzt;
+					    return null;
 					  }
 			}
 					);
@@ -228,9 +289,9 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			table.setTransferHandler(new TS());
 			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			table.getColumnModel().getColumn(0).setPreferredWidth(40);
-			table.getColumnModel().getColumn(0).setCellRenderer(new TextAreaRenderer());
+			//table.getColumnModel().getColumn(0).setCellRenderer(new TextAreaRenderer());
 			table.setRowHeight(40);
-			table.setDefaultRenderer(Object.class, tableRenderer);
+			table.setDefaultRenderer(Object.class, new ValueRenderer());
 			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));	
 			
 			//add(new JScrollPane(table));
