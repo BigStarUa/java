@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 
@@ -36,8 +37,11 @@ public class TS extends TransferHandler{
     	if(((JTable) source).getSelectedColumn() > 0){
     		Group_schedule s = (Group_schedule) ((SummaryTableModel)((JTable) source).getModel()).getObjectAt(((JTable) source).getSelectedRow(), ((JTable) source).getSelectedColumn()-1);
     	sourceIndexColumn = ((JTable) source).getSelectedColumn();
-    	
+    	if(s.getId() > 0){
     	return new TransferableSchedule(s);  
+    	}else{
+    		return null;
+    	}
     	}
     	return null;
 //        return new StringSelection((String) ((JTable) source).getModel().getValueAt(((JTable) source).getSelectedRow(), ((JTable) source).getSelectedColumn()));  
@@ -87,21 +91,52 @@ public class TS extends TransferHandler{
 	        JTable jt = (JTable) support.getComponent(); 
 	        JTable.DropLocation dl = (JTable.DropLocation)support.getDropLocation();
 	        sourceSchedule = ((SummaryTableModel)jt.getModel()).getObjectAt(dl.getRow(), dl.getColumn()-1);
-	        
+	       
 	        try {  
-	        	
+	        	 Group_schedule destinationSchedule = (Group_schedule)support.getTransferable().getTransferData(FLAVOR);
+	        	 if(sourceSchedule.equals(destinationSchedule)) return false;
+	        	 if(!checkCapacity(destinationSchedule, sourceSchedule)) return false;
+	        	 
 	            jt.setValueAt(support.getTransferable().getTransferData(FLAVOR), jt.getSelectedRow(), jt.getSelectedColumn());  
 	            jt.repaint();
 	            jt.revalidate();
 	            isImported = true;
 	        } catch (UnsupportedFlavorException ex) {  
+	        	return false;
 	           // Logger.getLogger(TS.class.getName()).log(Level.SEVERE, null, ex);  
 	        } catch (IOException ex) {  
+	        	return false;
 	           // Logger.getLogger(TS.class.getName()).log(Level.SEVERE, null, ex);  
 	        }  
 	        return super.importData(support);  
     	}
     	return false;
+    }
+    
+    private boolean checkCapacity(Group_schedule sourceDS, Group_schedule destDS)
+    {
+    	int sourceRoomCapacity = sourceDS.getRoom().getCapacity();
+    	int destRoomCapacity = destDS.getRoom().getCapacity();
+    	int sourceGroupCapacity = sourceDS.getGroupObject().getCapacity();
+    	int destGroupCapacity = destDS.getGroupObject().getCapacity();
+    	
+    	if(sourceRoomCapacity >= destGroupCapacity &&
+    			destRoomCapacity >= sourceGroupCapacity)
+    	{
+    		return true;
+    	}else{
+    		String error = "";
+    		if(sourceRoomCapacity < destGroupCapacity)
+    		{
+    			error += "not enough space in " + sourceDS.getRoom().getName() + "(" + sourceRoomCapacity + ")" + " for " + destDS.getGroupObject().getName() + "(" + destGroupCapacity + ")" +"\n";
+    		}
+    		if(destRoomCapacity < sourceGroupCapacity)
+    		{
+    			error += "not enough space in " + destDS.getRoom().getName() + "(" + destRoomCapacity + ")" +" for " + sourceDS.getGroupObject().getName() + "(" + sourceGroupCapacity + ")" +"\n";
+    		}
+    		JOptionPane.showMessageDialog(null, "Error: \n" + error);
+    		return false;
+    	}
     }
 
 	@Override

@@ -94,7 +94,7 @@ public class SummaryGrid extends JPanel implements ToolBarInteface{
 				summaryList.addAll(getList(day));
 			}
 			
-			model = new SummaryTableModel(summaryList, roomsList);
+			model = new SummaryTableModel(summaryList, roomsList, db.connection);
 			
 			TableCellRenderer tableRenderer = (new TableCellRenderer()
 			{

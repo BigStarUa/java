@@ -121,11 +121,17 @@ public class Group_scheduleDAO{
 		return list;
 	}
 	
-	public List<Group_schedule> getGroup_scheduleListByScheduleIdRoomFixed(int schedule_id)
+	public List<Group_schedule> getGroup_scheduleListByScheduleIdRoomFixed(int schedule_id, boolean isFixed)
 	{
 		List<Group_schedule> list = new ArrayList<Group_schedule>();
 		try {
-			PreparedStatement ps = con.prepareStatement("SELECT * FROM group_schedule WHERE schedule_id=? AND room_fixed=1 ORDER BY room_id");
+			PreparedStatement ps;
+			if(isFixed)
+			{
+				ps = con.prepareStatement("SELECT * FROM group_schedule WHERE schedule_id=? AND room_fixed=1 ORDER BY room_id");
+			}else{
+				ps = con.prepareStatement("SELECT * FROM group_schedule WHERE schedule_id=? AND room_fixed=0 ORDER BY room_id");
+			}
 			ps.setInt(1, schedule_id);
 			ResultSet rs = ps.executeQuery();
 			

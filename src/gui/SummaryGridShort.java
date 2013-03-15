@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
@@ -37,6 +38,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 import schedule.DbHelper;
 import schedule.Group;
@@ -49,6 +54,7 @@ import schedule.Schedule;
 import schedule.ScheduleDAO;
 import schedule.ScheduleTableModel;
 import schedule.Summary;
+import schedule.SummaryJTextPane;
 import schedule.SummaryTableModel;
 import schedule.TS;
 
@@ -112,76 +118,6 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		  }
 		}
 	
-	public class TableJPanel extends JPanel
-	{
-
-  public TableJPanel() {
-    super();
-  }
-  @Override
-	public boolean isOpaque() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void repaint(long arg0, int arg1, int arg2,
-			int arg3, int arg4) {
-		// TODO Auto-generated method stub
-		super.repaint(arg0, arg1, arg2, arg3, arg4);
-	}
-
-	@Override
-	public void repaint(Rectangle arg0) {
-		// TODO Auto-generated method stub
-		super.repaint(arg0);
-	}
-
-	@Override
-	public void revalidate() {
-		// TODO Auto-generated method stub
-		super.revalidate();
-	}
-
-	@Override
-	public void invalidate() {
-		// TODO Auto-generated method stub
-		super.invalidate();
-	}
-
-	@Override
-	public void validate() {
-		// TODO Auto-generated method stub
-		super.validate();
-	}
-  
-}
-	
-	private static class ValueRenderer extends JTextArea
-    implements TableCellRenderer {
-
-    private static final Color hilite = new Color(0xE8E8E8);
-
-    public ValueRenderer() {
-        this.setOpaque(true);
-    }
-
-    @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int col) {
-       // Value v = (Value) value;
-        //this.setSelected(v.selected);
-        this.setText(value.toString());
-        if (isSelected) {
-            this.setBackground(hilite);
-        } else {
-            this.setBackground(Color.white);
-        }
-        return this;
-    }
-}
-	
 	private void addContent()
 	{		
 		scheduleDAO = new ScheduleDAO(db.connection);
@@ -191,92 +127,43 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		for(String day : StaticRes.WEEK_DAY_LIST)
 		{
 			
-			model = new SummaryTableModel(getList(day), roomsList);
+			model = new SummaryTableModel(getList(day), roomsList, db.connection);
 			
 			TableCellRenderer tableRenderer = (new TableCellRenderer()
 			{
-				protected DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer()
-				{
-
-				
-					
-				};
+				//protected DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer();
 				
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					      boolean hasFocus, int row, int column) {
 
-						JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, value, isSelected,
-							      hasFocus, row, column);
+						//JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, value, isSelected,hasFocus, row, column);
+						Border border = BorderFactory.createEmptyBorder(1,3,1,1);
 					
-			
-						JTextArea texzt = new JTextArea()
-						{
-							
-							@Override
-							public boolean isOpaque() {
-								// TODO Auto-generated method stub
-								return false;
-							}
-
-							@Override
-							public void repaint(long arg0, int arg1, int arg2,
-									int arg3, int arg4) {
-								// TODO Auto-generated method stub
-								super.repaint(arg0, arg1, arg2, arg3, arg4);
-							}
-
-							@Override
-							public void repaint(Rectangle arg0) {
-								// TODO Auto-generated method stub
-								super.repaint(arg0);
-							}
-
-							@Override
-							public void revalidate() {
-								// TODO Auto-generated method stub
-								super.revalidate();
-							}
-
-							@Override
-							public void invalidate() {
-								// TODO Auto-generated method stub
-								super.invalidate();
-							}
-
-							@Override
-							public void validate() {
-								// TODO Auto-generated method stub
-								//super.validate();
-							}
-							
-						};
-						
-						TableJPanel panel = new TableJPanel();
-						
-						Border pBorder = BorderFactory.createCompoundBorder(label.getBorder(), BorderFactory.createEmptyBorder(3,5,3,3));
-						
-						//Border paddingBorder = BorderFactory.createEmptyBorder(3,5,3,3);
+						SummaryJTextPane panel = new SummaryJTextPane();
 						if(value != null)
 						{
-
-							//label.setText(value.toString());
-							//label.setBorder(pBorder);
-							texzt.setText(value.toString());
-
+							if(column > 0)
+							{
+								panel = (SummaryJTextPane)value;
+							}else{
+								
+								JLabel label = new JLabel();
+								label.setText(value.toString());
+								label.setBorder(border);
+								//label.setForeground(Color.gray);
+								label.setBackground(Color.LIGHT_GRAY);
+								label.setOpaque(true);
+								return label;
+							}
 						}
-						if(hasFocus)
+						if(hasFocus && column > 0)
 						{
-							texzt.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-							texzt.setForeground(UIManager.getColor("Table.focusCellForeground"));
-							texzt.setBackground(UIManager.getColor("Table.focusCellBackground"));
+							panel.setBorder(BorderFactory.createCompoundBorder(UIManager.getBorder("Table.focusCellHighlightBorder"), border));
+							//panel.setForeground(UIManager.getColor("Table.focusCellForeground"));
+							//panel.setBackground(Color.DARK_GRAY);
 						}
-						JLabel label1 = new JLabel();
-						label1.setText("Test");
-						//panel.setLayout(new BoxLayout(table, BoxLayout.X_AXIS));
-						panel.add(texzt);
-						panel.add(label1);
-						
-					    return null;
+
+					    return panel;
 					  }
 			}
 					);
@@ -291,7 +178,7 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			table.getColumnModel().getColumn(0).setPreferredWidth(40);
 			//table.getColumnModel().getColumn(0).setCellRenderer(new TextAreaRenderer());
 			table.setRowHeight(40);
-			table.setDefaultRenderer(Object.class, new ValueRenderer());
+			table.setDefaultRenderer(Object.class, tableRenderer);
 			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));	
 			
 			//add(new JScrollPane(table));
@@ -336,17 +223,17 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 	
 	List<Summary> sumList = new ArrayList<Summary>();
 	try{
-	for(Schedule schedule : scheduleList)
-	{
-		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule.getId());
-		//List<Group_schedule> groups = fillRooms(db, schedule.getId(), gs);
-		List<Group_schedule> groups = fillRoom(schedule.getId());
-		Collections.sort(groups, new Group_scheduleComparator());
-		Summary s = new Summary();
-		s.setSchedule(schedule);
-		s.setGSList(groups);
-		sumList.add(s);
-	}
+		for(Schedule schedule : scheduleList)
+		{
+			List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule.getId());
+			//List<Group_schedule> groups = fillRooms(db, schedule.getId(), gs);
+			List<Group_schedule> groups = fillRoom(schedule.getId());
+			Collections.sort(groups, new Group_scheduleComparator());
+			Summary s = new Summary();
+			s.setSchedule(schedule);
+			s.setGSList(groups);
+			sumList.add(s);
+		}
 	}catch(CapacityException e)
 	{
 		throw new CapacityException(e.getMessage());
@@ -354,20 +241,29 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 	return sumList;
 	}
 	
-	private List<Group_schedule> fillRoom(int schedule_id) throws CapacityException
+	private List<Group_schedule> fillGroupObject(GroupDAO groupDAO, List<Group_schedule> gs)
 	{
-		GroupDAO groupDAO = new GroupDAO(db.connection);
-		Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
-		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule_id);
-
 		for(int i = 0; i < gs.size(); i++)
 		{
 			gs.get(i).setGroupObject(groupDAO.getGroup(gs.get(i).getGroup()));
 		}
+		return gs;
+	}
+	
+	private List<Group_schedule> fillRoom(int schedule_id) throws CapacityException
+	{
+		GroupDAO groupDAO = new GroupDAO(db.connection);
+		Group_scheduleDAO gsDAO = new Group_scheduleDAO(db.connection);
+		//List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleId(schedule_id);
+		List<Group_schedule> gsIsFixed = gsDAO.getGroup_scheduleListByScheduleIdRoomFixed(schedule_id, true);
+		List<Group_schedule> gs = gsDAO.getGroup_scheduleListByScheduleIdRoomFixed(schedule_id, false);
+		fillGroupObject(groupDAO, gs);
+		fillGroupObject(groupDAO, gsIsFixed);
 		Collections.sort(gs);
 		
 		RoomDAO roomDAO = new RoomDAO(db.connection);
-		List<Room> rooms = roomDAO.getRoomList();
+		List<Room> rooms = roomDAO.getNotFixedRoomList(schedule_id, 0);
+		//List<Room> rooms = roomDAO.getRoomList();
 		Collections.sort(rooms);
 		
 		int count = Math.max(gs.size(), rooms.size());
@@ -464,6 +360,7 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			}
 		}
 		}
+		gs.addAll(gsIsFixed);
 		return gs;
 	}
 	
