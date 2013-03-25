@@ -82,7 +82,7 @@ public class SummaryTableModel extends AbstractTableModel {
 		
 		if(columnIndex == 0)
 		{
-			return roomsList.get(rowIndex).getName();
+			return roomsList.get(rowIndex).getName() + " (" + roomsList.get(rowIndex).getCapacity() + ")";
 		}else{
 		
 			Summary summary = summaryList.get(columnIndex-1);
@@ -96,14 +96,15 @@ public class SummaryTableModel extends AbstractTableModel {
 			}
 			if(gs.getGroupObject().getName() != null)
 			{
-				scheduleName = gs.getGroupObject().getName();
+				scheduleName = gs.getGroupObject().getName() + " (" + gs.getGroupObject().getCapacity() + ")";
 			}
 			SummaryJTextPane panel = new SummaryJTextPane();
 			panel.setText(scheduleName);
 			SimpleAttributeSet set = new SimpleAttributeSet();
-		    StyleConstants.setItalic(set, true);
-		    StyleConstants.setForeground(set, Color.red);
-		    StyleConstants.setBackground(set, Color.blue);
+		    //StyleConstants.setItalic(set, true);
+		    StyleConstants.setBold(set, true);
+		    StyleConstants.setForeground(set, Color.blue);
+		    //StyleConstants.setBackground(set, Color.blue);
 		    
 		    Document doc = panel.getStyledDocument();
 		    try {

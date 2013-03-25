@@ -27,6 +27,7 @@ public class ScheduleDAO {
 		schedule.setWeekDay(rs.getString("week_day"));	
 		schedule.setStatus(Schedule.STATUS_OLD);	
 		schedule.setTime(rs.getString("time"));
+		schedule.setDuration(rs.getInt("duration"));
 		return schedule;
 	}
 	
@@ -107,16 +108,17 @@ public class ScheduleDAO {
 		try {
 			if(schedule.getId() > 0)
 			{
-				ps = con.prepareStatement("UPDATE schedule SET name=?, week_day=?, time=? WHERE id=?");
-				ps.setInt(4, schedule.getId());
+				ps = con.prepareStatement("UPDATE schedule SET name=?, week_day=?, time=?, duration=? WHERE id=?");
+				ps.setInt(5, schedule.getId());
 			}
 			else
 			{
-				ps = con.prepareStatement("INSERT INTO schedule (name, week_day, time) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+				ps = con.prepareStatement("INSERT INTO schedule (name, week_day, time, duration) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			}
 			ps.setString(1, schedule.getName());
 			ps.setString(2, schedule.getWeekDay());
 			ps.setString(3, schedule.getTime());
+			ps.setInt(4, schedule.getDuration());
 			ps.executeUpdate();
 			
 			ResultSet generatedKeys = ps.getGeneratedKeys();

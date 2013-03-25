@@ -9,8 +9,8 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -25,11 +26,9 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.text.MaskFormatter;
 
 import schedule.DbHelper;
-import schedule.GroupDAO;
 import schedule.ResultListener;
 import schedule.Schedule;
 import schedule.ScheduleDAO;
-import schedule.Teacher;
 
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -46,9 +45,9 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 	private JComboBox cbWeekDay;
 	private String selected_tab;
 	private JFormattedTextField frmtdtxtfldTime;
-	private MaskFormatter dateMask;
 	private ResultListener listener;
 	private Schedule schedule;
+	private JTextField txtDuration;
 
 	public ScheduleDialog() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -102,7 +101,7 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 		cbWeekDay.setSelectedItem(selected_tab);
 		contentPanel.add(cbWeekDay);
 		
-		JLabel lblTime = new JLabel("Time");
+		JLabel lblTime = new JLabel("Time:");
 		lblTime.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblTime.setBounds(21, 82, 46, 14);
 		contentPanel.add(lblTime);
@@ -112,6 +111,28 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 		//frmtdtxtfldTime.setValue("10:00");
 		frmtdtxtfldTime.setBounds(96, 81, 164, 20);
 		contentPanel.add(frmtdtxtfldTime);
+		
+		JLabel lblDuration = new JLabel("Duration:");
+		lblDuration.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDuration.setBounds(21, 108, 65, 14);
+		contentPanel.add(lblDuration);
+		
+		txtDuration = new JTextField();
+		txtDuration.setBounds(96, 107, 86, 20);
+		txtDuration.addKeyListener(new KeyAdapter()
+		{
+		public void keyTyped(KeyEvent ke)
+		{
+			char c = ke.getKeyChar();
+			if (!Character.isDigit(c))
+			ke.consume(); // prevent event propagation
+		}
+		}); 
+		contentPanel.add(txtDuration);
+		
+		JLabel lblMinutes = new JLabel("minutes (60 = 1 hour)");
+		lblMinutes.setBounds(192, 110, 123, 14);
+		contentPanel.add(lblMinutes);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(UIManager.getBorder("MenuBar.border"));
@@ -145,18 +166,12 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 						}
 						else
 						{
-							fillAndSaveSchedule();
-							dispose();
-							listener.returnObject(schedule);
-						}
-						//fillGroup();
-						//if(saveGroup())
-						//{
-						//	dispose();
-						//}else{
-						//	
-						//}
-						
+							if(fillAndSaveSchedule())
+							{
+								dispose();
+								listener.returnObject(schedule);
+							}
+						}					
 					}
 				});
 				buttonPane.add(okButton);
@@ -183,22 +198,33 @@ public class ScheduleDialog extends JDialog implements ActionListener{
 		{
 			txtName.setText(this.schedule.getName());
 			frmtdtxtfldTime.setValue(this.schedule.getTime());
+			txtDuration.setText(String.valueOf(this.schedule.getDuration()));
 		}
 	}
 	
-	private void fillAndSaveSchedule()
+	private boolean fillAndSaveSchedule()
 	{
-		schedule.setName(txtName.getText());
-		schedule.setTime((String)frmtdtxtfldTime.getValue());
-		schedule.setWeekDay(cbWeekDay.getSelectedItem().toString());
-		
-		ScheduleDAO scheduleDAO = new ScheduleDAO(db.connection);
-		int id = scheduleDAO.updateSchedule(schedule);
-		if(schedule.getId() == 0)
+		boolean correct = true;
+		try{
+			
+			schedule.setName(txtName.getText());
+			schedule.setTime((String)frmtdtxtfldTime.getValue());
+			schedule.setWeekDay(cbWeekDay.getSelectedItem().toString());
+			schedule.setDuration(Integer.parseInt(txtDuration.getText()));
+			
+			ScheduleDAO scheduleDAO = new ScheduleDAO(db.connection);
+			int id = scheduleDAO.updateSchedule(schedule);
+			if(schedule.getId() == 0)
+			{
+				schedule.setId(id);
+				schedule.setStatus(Schedule.STATUS_NEW);
+			}
+		}catch(NumberFormatException e)
 		{
-			schedule.setId(id);
-			schedule.setStatus(Schedule.STATUS_NEW);
+			JOptionPane.showMessageDialog(this, "Erorr generated: \n" + e.getMessage());
+			correct = false;
 		}
+		return correct;
 	}
 	private DefaultComboBoxModel dayModel(Object[] list)
 	{

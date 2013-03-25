@@ -7,6 +7,7 @@ import gui.res.StaticRes;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,12 +25,14 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneLayout;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -85,38 +88,6 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		addContent();
 		setToolBar();
 	}
-	
-	class MultiLineCellRenderer extends JTextArea implements TableCellRenderer {
-
-		  public MultiLineCellRenderer() {
-		    setLineWrap(true);
-		    setWrapStyleWord(true);
-		    setOpaque(true);
-		  }
-
-		  public Component getTableCellRendererComponent(JTable table, Object value,
-		      boolean isSelected, boolean hasFocus, int row, int column) {
-		    if (isSelected) {
-		      setForeground(table.getSelectionForeground());
-		      setBackground(table.getSelectionBackground());
-		    } else {
-		      setForeground(table.getForeground());
-		      setBackground(table.getBackground());
-		    }
-		    setFont(table.getFont());
-		    if (hasFocus) {
-		      setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-		      if (table.isCellEditable(row, column)) {
-		        setForeground(UIManager.getColor("Table.focusCellForeground"));
-		        setBackground(UIManager.getColor("Table.focusCellBackground"));
-		      }
-		    } else {
-		      setBorder(new EmptyBorder(1, 2, 1, 2));
-		    }
-		    setText((value == null) ? "" : value.toString());
-		    return this;
-		  }
-		}
 	
 	private void addContent()
 	{		
@@ -179,12 +150,9 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 			//table.getColumnModel().getColumn(0).setCellRenderer(new TextAreaRenderer());
 			table.setRowHeight(40);
 			table.setDefaultRenderer(Object.class, tableRenderer);
-			setLayout(new BoxLayout(this, BoxLayout.X_AXIS));	
-			
-			//add(new JScrollPane(table));
-			
-			//setToolBar();
-		tabbedPane.addTab(day,new JScrollPane(table));
+			//setLayout(new BoxLayout(this, BoxLayout.X_AXIS));	
+
+		tabbedPane.addTab(day, new JScrollPane(table));
 		}
 		}catch(CapacityException e)
 		{
@@ -364,93 +332,6 @@ public class SummaryGridShort extends JPanel implements ToolBarInteface {
 		return gs;
 	}
 	
-	private List<Group_schedule> fillRooms(DbHelper db, int schedule, List<Group_schedule> gs)
-	{
-		GroupDAO groupDAO = new GroupDAO(db.connection);
-		List<Group> groupList = groupDAO.getGroupList(schedule);
-		Collections.sort(groupList);
-		
-		for(int i = 0; i < gs.size(); i++)
-		{
-			gs.get(i).setGroupObject(groupDAO.getGroup(gs.get(i).getGroup()));
-		}
-		Collections.sort(gs);
-		
-		RoomDAO roomDAO = new RoomDAO(db.connection);
-		List<Room> rooms = roomDAO.getRoomList();
-		Collections.sort(rooms);
-		
-		int count = Math.max(gs.size(), rooms.size());
-		for (int i = 0; i < count; i++)
-		{
-			
-			if(i == rooms.size())
-			{
-				Room virtRoom = new Room();
-				virtRoom.setCapacity(99);
-				virtRoom.setValue(0);
-				rooms.add(virtRoom);
-			}
-			else if(i == gs.size())
-			{
-				Group virtGroup = new Group();
-				virtGroup.setCapacity(0);
-				virtGroup.setValue(0);
-				Group_schedule newGS = new Group_schedule();
-				newGS.setGroupObject(virtGroup);
-				gs.add(newGS);
-			}
-			Group_schedule g = gs.get(i);
-			Room r = rooms.get(i);
-			g.setRoom(r);
-		}
-		
-		boolean flag = true;
-		while(flag)
-		{
-			flag = false;
-		for (int i = 0; i < gs.size(); i++)
-			{
-			Group_schedule r = gs.get(i);
-			if(r.getRoom() == null) continue;
-			
-			for (int n = 0; n < gs.size(); n++)
-			{
-				Group_schedule g = gs.get(n);
-				//if(g == null) continue;
-				
-				if(r.getRoom() == null) break;
-				
-				if(r.getGroupObject().getValue() < g.getGroupObject().getValue()) {
-					if(g.getRoom() == null && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity()){
-						
-						g.setRoom(r.getRoom());
-						r.setRoom(null);
-						flag = true;
-						
-					}else if(g.getRoom() != null && r.getRoom() != null){
-						if(r.getRoom().getValue() > g.getRoom().getValue() && r.getRoom().getCapacity() >= g.getGroupObject().getCapacity() && 
-								g.getRoom().getCapacity() >= r.getGroupObject().getCapacity()) 
-						{
-							Room temp = r.getRoom();
-							r.setRoom(g.getRoom());
-							g.setRoom(temp);
-							flag = true;
-						}
-						
-					}
-											
-					
-				}
-
-			}
-			
-			}
-		}
-		
-		return gs;
-	}
-
 	private void setToolBar()
 	{
 		JToolBar toolBar = new JToolBar();
