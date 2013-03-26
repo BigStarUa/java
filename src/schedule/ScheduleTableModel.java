@@ -36,7 +36,7 @@ public class ScheduleTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	public String getColumnName(int columnIndex) {
@@ -47,6 +47,8 @@ public class ScheduleTableModel extends AbstractTableModel {
 			return "Week Day";
 		case 2:
 			return "Time";
+		case 3:
+			return "Duration (min.)";
 		}
 		return "";
 	}
@@ -64,6 +66,8 @@ public class ScheduleTableModel extends AbstractTableModel {
 			return schedule.getWeekDay();
 		case 2:
 			return schedule.getTime();
+		case 3:
+			return schedule.getDuration();
 		case -1:
 			return schedule;
 		}

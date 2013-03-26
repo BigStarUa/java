@@ -36,10 +36,6 @@ import java.awt.Dimension;
 public class MainFrame extends JFrame implements ToolBarInteface{
 
 	private JPanel contentPane;
-	
-//	private static final Icon CLOSE_TAB_ICON = StaticRes.CLOSE_TAB_ICON;
-//	private static final Icon CLOSE_TAB_ICON_HOVER = StaticRes.CLOSE_TAB_ICON_HOVER;
-//	private static final Icon PAGE_ICON = StaticRes.PAGE_ICON;
 	private int tabCount = 0;
 	
 	// Variables declaration - do not modify                    
@@ -228,6 +224,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 		        else
 		        {
 		        	comp = MainFrame.this;
+		        	MainFrame.this.setToolBar();
 		        }
 		        reBuildJToolBar(comp);
 		      }
@@ -319,6 +316,17 @@ public class MainFrame extends JFrame implements ToolBarInteface{
         });
 		mnReports.add(mntmShortTable);
 		
+		JMenuItem mntmTeacherSum = new JMenuItem("Teacher sum");
+		mntmTeacherSum.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	if(!checkExistingTab(SummaryTeacherGrid.class.getName()))
+            	{
+            		createTabButtonActionPerformed(evt, new SummaryTeacherGrid(MainFrame.this), "Summary (Teacher)", StaticRes.SCHEDULE_ICON);
+            	}
+            }
+        });
+		mnReports.add(mntmTeacherSum);
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -363,7 +371,7 @@ public class MainFrame extends JFrame implements ToolBarInteface{
 				
 			}
 		});
-		toolBar.add(btnNewButton);
+		//toolBar.add(btnNewButton);
 		
 		this.toolBarPanel = toolBar;
 	}
