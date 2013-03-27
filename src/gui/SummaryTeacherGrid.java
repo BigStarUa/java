@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -53,13 +54,15 @@ public class SummaryTeacherGrid extends JPanel implements ToolBarInteface{
 		this.toolBar = new JToolBar();
 		
 		panel = new JPanel();
+		panel.setBackground(Color.white);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWeights = new double[]{1.0};
 		panel.setLayout(gbl_panel);
 		
 		JLabel btnNewButton = new JLabel("John");
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
+		gbc_btnNewButton.anchor = GridBagConstraints.WEST;
+		gbc_btnNewButton.insets = new Insets(5, 5, 0, 0);
 		gbc_btnNewButton.gridx = 0;
 		gbc_btnNewButton.gridy = 0;
 		panel.add(btnNewButton, gbc_btnNewButton);
@@ -78,7 +81,8 @@ public class SummaryTeacherGrid extends JPanel implements ToolBarInteface{
 		
 		JLabel lblBob = new JLabel("Bob");
 		GridBagConstraints gbc_lblBob = new GridBagConstraints();
-		gbc_lblBob.insets = new Insets(0, 0, 5, 5);
+		gbc_lblBob.anchor = GridBagConstraints.WEST;
+		gbc_lblBob.insets = new Insets(5, 5, 0, 0);
 		gbc_lblBob.gridx = 0;
 		gbc_lblBob.gridy = 2;
 		panel.add(lblBob, gbc_lblBob);
@@ -93,6 +97,7 @@ public class SummaryTeacherGrid extends JPanel implements ToolBarInteface{
 		panel.add(table_1, gbc_table_1);
 		
 		GridBagConstraints gbc_table = new GridBagConstraints();
+		gbc_table.ipadx = 10;
 		gbc_table.fill = GridBagConstraints.HORIZONTAL;
 		gbc_table.gridx = 0;
 		gbc_table.gridy = 1;
